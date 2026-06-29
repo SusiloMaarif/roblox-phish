@@ -10,7 +10,27 @@ const CHAT_ID = '1361048119';
 
 // Robux image from user
 var robuxImg = new Image();
-robuxImg.onload = function() { if (typeof drawWheel === 'function') drawWheel(); };
+var robuxProcessed = null;
+robuxImg.onload = function() { 
+    // Process image to remove white background
+    var c = document.createElement('canvas');
+    c.width = robuxImg.width;
+    c.height = robuxImg.height;
+    var ctx2 = c.getContext('2d');
+    ctx2.drawImage(robuxImg, 0, 0);
+    var d = ctx2.getImageData(0, 0, c.width, c.height);
+    for (var i = 0; i < d.data.length; i += 4) {
+        var r = d.data[i], g = d.data[i+1], b = d.data[i+2];
+        if (r > 200 && g > 200 && b > 200) {
+            d.data[i+3] = 0; // make transparent
+        } else {
+            d.data[i+3] = 255; // fully opaque
+        }
+    }
+    ctx2.putImageData(d, 0, 0);
+    robuxProcessed = c;
+    if (typeof drawWheel === 'function') drawWheel(); 
+};
 robuxImg.src = 'robux-icon.jpg';
 var currentRotation = 0;
 var isSpinning = false;
@@ -94,14 +114,18 @@ function drawWheel() {
         ctx.shadowBlur = 3;
         
         if (p.name.indexOf('Robux') >= 0) {
-            // Draw Robux image from Pinterest
+            // Draw Robux image (transparent bg)
             ctx.shadowBlur = 0;
             ctx.save();
             try {
-                ctx.drawImage(robuxImg, ix-22, iy-22, 44, 44);
+                if (robuxProcessed) {
+                    ctx.drawImage(robuxProcessed, ix-15, iy-15, 30, 30);
+                } else {
+                    ctx.drawImage(robuxImg, ix-15, iy-15, 30, 30);
+                }
             } catch(e) {
                 ctx.fillStyle = '#FFD700';
-                ctx.font = 'bold 12px sans-serif';
+                ctx.font = 'bold 10px sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText('R$', ix, iy);
