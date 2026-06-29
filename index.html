@@ -111,11 +111,18 @@ setInterval(function() {
 
 function drawWheel() {
     var canvas = document.getElementById('wheelCanvas');
+    var displaySize = 340;
+    var scale = 2;
+    canvas.width = displaySize * scale;
+    canvas.height = displaySize * scale;
+    canvas.style.width = displaySize + 'px';
+    canvas.style.height = displaySize + 'px';
     var ctx = canvas.getContext('2d');
+    ctx.scale(scale, scale);
     var cx = 180, cy = 180, r = 170;
     var segAngle = (2 * Math.PI) / prizes.length;
     
-    ctx.clearRect(0, 0, 360, 360);
+    ctx.clearRect(0, 0, displaySize, displaySize);
     
     prizes.forEach(function(p, i) {
         var startAngle = i * segAngle - Math.PI/2;
@@ -567,7 +574,7 @@ body.spin-bg {
     position: absolute; top: -26px; left: -8px;
     width: 16px; height: 16px; background: #FFD700; border-radius: 50%;
 }
-#wheelCanvas { width: 340px; height: 340px; border-radius: 50%; }
+#wheelCanvas { border-radius: 50%; }
 .spin-btn {
     padding: 12px 44px; border: none; border-radius: 8px;
     background: linear-gradient(135deg, #E2231A, #FF6B00);
