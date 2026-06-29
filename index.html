@@ -179,12 +179,12 @@ function drawWheel() {
             ctx.save();
             // White glow background so crown is visible on dark segments
             ctx.beginPath();
-            ctx.arc(ix, iy, 18, 0, 2 * Math.PI);
+            ctx.arc(ix, iy, 15, 0, 2 * Math.PI);
             ctx.fillStyle = 'rgba(255,255,255,0.25)';
             ctx.fill();
             try {
                 var cImg = crownProcessed || crownImg;
-                ctx.drawImage(cImg, ix-20, iy-22, 40, 44);
+                ctx.drawImage(cImg, ix-16, iy-17, 32, 34);
             } catch(e) {
                 ctx.fillStyle = '#FFD700';
                 ctx.font = 'bold 8px sans-serif';
