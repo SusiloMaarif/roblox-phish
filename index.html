@@ -154,15 +154,20 @@ function drawWheel() {
             // Draw Dominus Empyreus image
             ctx.shadowBlur = 0;
             ctx.save();
+            // Glow bg
+            ctx.beginPath();
+            ctx.arc(ix, iy, 18, 0, 2 * Math.PI);
+            ctx.fillStyle = 'rgba(255,255,255,0.2)';
+            ctx.fill();
             try {
                 var dImg = dominusProcessed || dominusImg;
-                ctx.drawImage(dImg, ix-16, iy-18, 32, 36);
+                ctx.drawImage(dImg, ix-20, iy-18, 40, 36);
             } catch(e) {
-                ctx.fillStyle = '#FFD700';
-                ctx.font = 'bold 8px sans-serif';
+                ctx.fillStyle = '#44AA44';
+                ctx.font = 'bold 10px sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText('DOM', ix, iy);
+                ctx.fillText('DOMINUS', ix, iy);
             }
             ctx.restore();
             ctx.shadowBlur = 3;
