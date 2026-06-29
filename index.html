@@ -94,35 +94,26 @@ function drawWheel() {
         ctx.shadowBlur = 3;
         
         if (p.name.indexOf('Robux') >= 0) {
-            // Draw REAL Robux icon image from user
+            // Draw Robux icon image
             ctx.shadowBlur = 0;
-            ctx.save();
-            // Create circular clip for the image
+            // Draw background circle
             ctx.beginPath();
-            ctx.arc(ix, iy, 16, 0, 2 * Math.PI);
-            ctx.clip();
-            // Draw the Robux image into the circle
-            if (robuxImg.complete && robuxImg.width > 0) {
-                ctx.drawImage(robuxImg, ix-20, iy-20, 40, 40);
-            } else {
-                // Fallback: draw gold coin if image not loaded
-                ctx.beginPath();
-                ctx.arc(ix, iy, 15, 0, 2 * Math.PI);
-                ctx.fillStyle = '#FFD700';
-                ctx.fill();
-                ctx.fillStyle = '#fff';
-                ctx.font = 'bold 16px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('R$', ix, iy+1);
-            }
-            ctx.restore();
-            // Add border
-            ctx.beginPath();
-            ctx.arc(ix, iy, 16, 0, 2 * Math.PI);
-            ctx.strokeStyle = '#6B4F10';
+            ctx.arc(ix, iy, 17, 0, 2 * Math.PI);
+            ctx.fillStyle = 'rgba(255,215,0,0.3)';
+            ctx.fill();
+            ctx.strokeStyle = '#8B6914';
             ctx.lineWidth = 1.5;
             ctx.stroke();
+            // Draw the Robux image directly (white bg becomes invisible against wheel bg)
+            if (robuxImg.complete && robuxImg.width > 0) {
+                ctx.drawImage(robuxImg, ix-22, iy-18, 44, 44);
+            } else {
+                ctx.font = 'bold 14px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#fff';
+                ctx.fillText('R$', ix, iy+1);
+            }
             ctx.shadowBlur = 3;
         } else if (p.name.indexOf('Dominus') >= 0) {
             // Draw crown
