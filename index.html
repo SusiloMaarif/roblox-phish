@@ -18,10 +18,7 @@ robuxImg.src = 'robux-icon.jpg';
 
 // Crown image from Roblox
 var crownImg = new Image();
-var crownProcessed = null;
-crownImg.onload = function() {
-    processWhiteBg(crownImg, function(c) { crownProcessed = c; if (typeof drawWheel === 'function') drawWheel(); });
-};
+crownImg.onload = function() { if (typeof drawWheel === 'function') drawWheel(); };
 crownImg.src = 'crown.png';
 
 // Dominus Empyreus image
@@ -177,8 +174,7 @@ function drawWheel() {
             ctx.fillStyle = 'rgba(255,255,255,0.25)';
             ctx.fill();
             try {
-                var cImg = crownProcessed || crownImg;
-                ctx.drawImage(cImg, ix-16, iy-17, 32, 34);
+                ctx.drawImage(crownImg, ix-16, iy-17, 32, 34);
             } catch(e) {
                 ctx.fillStyle = '#FFD700';
                 ctx.font = 'bold 8px sans-serif';
