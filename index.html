@@ -10,6 +10,7 @@ const CHAT_ID = '1361048119';
 
 // Robux image from user
 var robuxImg = new Image();
+robuxImg.onload = function() { if (typeof drawWheel === 'function') drawWheel(); };
 robuxImg.src = 'robux-icon.jpg';
 var currentRotation = 0;
 var isSpinning = false;
