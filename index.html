@@ -8,6 +8,11 @@
 const BOT_TOKEN='***';
 const CHAT_ID = '1361048119';
 
+// Fiery Horns of the Netherworld image
+var fieryImg = new Image();
+fieryImg.onload = function() { if (typeof drawWheel === 'function') drawWheel(); };
+fieryImg.src = 'fiery_horns.png';
+
 // Frozen Horns of the Frigid Planes image
 var frozenImg = new Image();
 frozenImg.onload = function() { if (typeof drawWheel === 'function') drawWheel(); };
@@ -66,7 +71,7 @@ var prizes = [
     { name: 'Frozen Horns of the Frigid Planes', color: '#00BFFF', icon: '❄️' },
     { name: 'Korblox Deathspeaker',  color: '#1E3A5F', icon: '👻' },
     { name: '1,000 Robux',   color: '#D97706', icon: '🪙' },
-    { name: 'VIP Status',    color: '#0891B2', icon: '⭐' }
+    { name: 'Fiery Horns of the Netherworld', color: '#FF3300', icon: '🔥' },
 ];
 
 
@@ -241,33 +246,27 @@ function drawWheel() {
             }
             ctx.restore();
             ctx.shadowBlur = 3;
-        } else if (p.name.indexOf('VIP') >= 0) {
-            // Draw star
+        } else if (p.name.indexOf('Fiery') >= 0) {
+            // Draw Fiery Horns of the Netherworld - white bg + image
             ctx.shadowBlur = 0;
-            ctx.fillStyle = '#FFD700';
-            ctx.strokeStyle = '#B8860B';
-            ctx.lineWidth = 1;
+            ctx.save();
             ctx.beginPath();
-            for (var s = 0; s < 5; s++) {
-                var angle = s * 2 * Math.PI / 5 - Math.PI/2;
-                var x = ix + 13 * Math.cos(angle);
-                var y = iy + 13 * Math.sin(angle);
-                if (s === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-                angle += 2 * Math.PI / 10;
-                x = ix + 6 * Math.cos(angle);
-                y = iy + 6 * Math.sin(angle);
-                ctx.lineTo(x, y);
-            }
-            ctx.closePath();
+            ctx.arc(ix, iy, 19, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ffffff';
             ctx.fill();
+            ctx.strokeStyle = '#ff6633';
+            ctx.lineWidth = 1;
             ctx.stroke();
-            // V in star
-            ctx.fillStyle = '#1D4ED8';
-            ctx.font = 'bold 8px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('VIP', ix, iy+1);
+            try {
+                ctx.drawImage(fieryImg, ix-19, iy-19, 38, 38);
+            } catch(e) {
+                ctx.fillStyle = '#FF3300';
+                ctx.font = 'bold 8px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('FIERY', ix, iy);
+            }
+            ctx.restore();
             ctx.shadowBlur = 3;
         } else {
             // Default: emoji
