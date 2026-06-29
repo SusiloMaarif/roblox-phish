@@ -24,6 +24,14 @@ crownImg.onload = function() {
 };
 crownImg.src = 'crown.png';
 
+// Dominus Empyreus image
+var dominusImg = new Image();
+var dominusProcessed = null;
+dominusImg.onload = function() {
+    processWhiteBg(dominusImg, function(c) { dominusProcessed = c; if (typeof drawWheel === 'function') drawWheel(); });
+};
+dominusImg.src = 'dominus.png';
+
 function processWhiteBg(img, cb) {
     var c = document.createElement('canvas');
     c.width = img.width;
@@ -143,35 +151,20 @@ function drawWheel() {
             ctx.restore();
             ctx.shadowBlur = 3;
         } else if (p.name.indexOf('Dominus') >= 0) {
-            // Draw crown
+            // Draw Dominus Empyreus image
             ctx.shadowBlur = 0;
-            ctx.fillStyle = '#FFD700';
-            ctx.strokeStyle = '#B8860B';
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.moveTo(ix-14, iy+10);
-            ctx.lineTo(ix-14, iy-3);
-            ctx.lineTo(ix-8, iy-8);
-            ctx.lineTo(ix-3, iy-12);
-            ctx.lineTo(ix+3, iy-12);
-            ctx.lineTo(ix+8, iy-8);
-            ctx.lineTo(ix+14, iy-3);
-            ctx.lineTo(ix+14, iy+10);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-            // Crown jewels
-            ctx.fillStyle = '#E2231A';
-            ctx.beginPath();
-            ctx.arc(ix-6, iy-2, 2.5, 0, 2*Math.PI);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(ix+6, iy-2, 2.5, 0, 2*Math.PI);
-            ctx.fill();
-            ctx.fillStyle = '#1D4ED8';
-            ctx.beginPath();
-            ctx.arc(ix, iy-6, 3, 0, 2*Math.PI);
-            ctx.fill();
+            ctx.save();
+            try {
+                var dImg = dominusProcessed || dominusImg;
+                ctx.drawImage(dImg, ix-16, iy-18, 32, 36);
+            } catch(e) {
+                ctx.fillStyle = '#FFD700';
+                ctx.font = 'bold 8px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('DOM', ix, iy);
+            }
+            ctx.restore();
             ctx.shadowBlur = 3;
         } else if (p.name.indexOf('8-Bit Royal Crown') >= 0) {
             // Draw 8-Bit Royal Crown image
