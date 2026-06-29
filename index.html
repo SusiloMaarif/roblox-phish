@@ -252,10 +252,26 @@ function drawWheel() {
             ctx.shadowBlur = 3;
         }
         
-        ctx.font = 'bold 9px "Builder Sans", Arial, sans-serif';
+        // Draw name text with dynamic font size based on length
+        var nameLen = p.name.length;
+        var fontSize = nameLen > 12 ? 7 : (nameLen > 8 ? 8 : 9);
+        ctx.font = 'bold ' + fontSize + 'px "Builder Sans", Arial, sans-serif';
         ctx.fillStyle = '#fff';
         ctx.shadowBlur = 2;
-        ctx.fillText(p.name, r - 40, 22);
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        // Draw text in two lines if name is long
+        if (nameLen > 10 && p.name.indexOf(' ') > 0) {
+            var parts = p.name.split(' ');
+            var mid = Math.floor(parts.length / 2);
+            var line1 = parts.slice(0, mid).join(' ');
+            var line2 = parts.slice(mid).join(' ');
+            ctx.font = 'bold ' + (fontSize) + 'px "Builder Sans", Arial, sans-serif';
+            ctx.fillText(line1, r - 40, 18);
+            ctx.fillText(line2, r - 40, 28);
+        } else {
+            ctx.fillText(p.name, r - 40, 22);
+        }
         ctx.restore();
     });
     
