@@ -99,26 +99,63 @@ function drawWheel() {
         ctx.shadowBlur = 3;
         
         if (p.name.indexOf('Robux') >= 0) {
-            // Draw Robux icon image
+            // Draw Robux coin - gold hexagon with R
             ctx.shadowBlur = 0;
-            // Draw background circle
+            ctx.save();
+            ctx.translate(ix, iy);
+            // Hexagon path
+            var hexR = 18;
             ctx.beginPath();
-            ctx.arc(ix, iy, 17, 0, 2 * Math.PI);
-            ctx.fillStyle = 'rgba(255,215,0,0.3)';
-            ctx.fill();
-            ctx.strokeStyle = '#8B6914';
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-            // Draw the Robux image directly (white bg becomes invisible against wheel bg)
-            try {
-                ctx.drawImage(robuxImg, ix-22, iy-18, 44, 44);
-            } catch(e) {
-                ctx.font = 'bold 13px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillStyle = '#fff';
-                ctx.fillText('R$', ix, iy+1);
+            for (var hi = 0; hi < 6; hi++) {
+                var angle = hi * Math.PI / 3 - Math.PI / 6;
+                var hx = hexR * Math.cos(angle);
+                var hy = hexR * Math.sin(angle);
+                if (hi === 0) ctx.moveTo(hx, hy);
+                else ctx.lineTo(hx, hy);
             }
+            ctx.closePath();
+            // Gold gradient fill
+            var hexGrad = ctx.createRadialGradient(-5, -5, 2, 0, 0, hexR);
+            hexGrad.addColorStop(0, '#FFE55C');
+            hexGrad.addColorStop(0.4, '#F5A623');
+            hexGrad.addColorStop(0.7, '#D4891A');
+            hexGrad.addColorStop(1, '#8B6914');
+            ctx.fillStyle = hexGrad;
+            ctx.fill();
+            ctx.strokeStyle = '#5C3D0E';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            // Inner lighter hexagon
+            ctx.beginPath();
+            for (var hi2 = 0; hi2 < 6; hi2++) {
+                var a2 = hi2 * Math.PI / 3 - Math.PI / 6;
+                var x2 = 12 * Math.cos(a2);
+                var y2 = 12 * Math.sin(a2);
+                if (hi2 === 0) ctx.moveTo(x2, y2);
+                else ctx.lineTo(x2, y2);
+            }
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(255,255,255,0.15)';
+            ctx.fill();
+            // White Blocky R
+            ctx.fillStyle = '#fff';
+            ctx.shadowColor = 'rgba(0,0,0,0.4)';
+            ctx.shadowBlur = 2;
+            // Vertical bar
+            ctx.fillRect(-5, -8, 3.5, 16);
+            // Top arc
+            ctx.fillRect(-5, -8, 8, 3.5);
+            // Middle bar
+            ctx.fillRect(-5, -3, 7, 3.5);
+            // Diagonal leg
+            ctx.beginPath();
+            ctx.moveTo(1, 1);
+            ctx.lineTo(8, 10);
+            ctx.lineTo(5, 10);
+            ctx.lineTo(-2, 1);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
             ctx.shadowBlur = 3;
         } else if (p.name.indexOf('Dominus') >= 0) {
             // Draw crown
