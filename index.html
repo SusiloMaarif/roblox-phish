@@ -26,6 +26,11 @@ var dominusImg = new Image();
 dominusImg.onload = function() { if (typeof drawWheel === 'function') drawWheel(); };
 dominusImg.src = 'dominus.png';
 
+// Korblox Deathspeaker image
+var korbloxImg = new Image();
+korbloxImg.onload = function() { if (typeof drawWheel === 'function') drawWheel(); };
+korbloxImg.src = 'korblox.png';
+
 function processWhiteBg(img, cb) {
     var c = document.createElement('canvas');
     c.width = img.width;
@@ -54,7 +59,7 @@ var prizes = [
     { name: '5,000 Robux',   color: '#1D4ED8', icon: '🪙' },
     { name: '8-Bit Royal Crown',  color: '#7C3AED', icon: '👑' },
     { name: '2,500 Robux',   color: '#059669', icon: '🪙' },
-    { name: 'Exclusive Badge',color: '#DC2626', icon: '🏅' },
+    { name: 'Korblox Deathspeaker',  color: '#1E3A5F', icon: '👻' },
     { name: '1,000 Robux',   color: '#D97706', icon: '🪙' },
     { name: 'VIP Status',    color: '#0891B2', icon: '⭐' }
 ];
@@ -187,31 +192,27 @@ function drawWheel() {
             }
             ctx.restore();
             ctx.shadowBlur = 3;
-        } else if (p.name.indexOf('Exclusive Badge') >= 0) {
-            // Draw badge/shield
+        } else if (p.name.indexOf('Korblox') >= 0) {
+            // Draw Korblox Deathspeaker - full white bg + image
             ctx.shadowBlur = 0;
-            ctx.fillStyle = '#FFD700';
-            ctx.strokeStyle = '#B8860B';
-            ctx.lineWidth = 1.5;
+            ctx.save();
             ctx.beginPath();
-            ctx.moveTo(ix-12, iy+8);
-            ctx.lineTo(ix-14, iy-6);
-            ctx.lineTo(ix-10, iy-12);
-            ctx.lineTo(ix-5, iy-14);
-            ctx.lineTo(ix, iy-10);
-            ctx.lineTo(ix+5, iy-14);
-            ctx.lineTo(ix+10, iy-12);
-            ctx.lineTo(ix+14, iy-6);
-            ctx.lineTo(ix+12, iy+8);
-            ctx.closePath();
+            ctx.arc(ix, iy, 19, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ffffff';
             ctx.fill();
+            ctx.strokeStyle = '#aaa';
+            ctx.lineWidth = 1;
             ctx.stroke();
-            // Star in badge
-            ctx.fillStyle = '#E2231A';
-            ctx.font = '10px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('★', ix, iy-2);
+            try {
+                ctx.drawImage(korbloxImg, ix-16, iy-22, 32, 44);
+            } catch(e) {
+                ctx.fillStyle = '#4488cc';
+                ctx.font = 'bold 8px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('KORBLOX', ix, iy);
+            }
+            ctx.restore();
             ctx.shadowBlur = 3;
         } else if (p.name.indexOf('VIP') >= 0) {
             // Draw star
