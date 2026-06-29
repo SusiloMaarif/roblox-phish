@@ -26,10 +26,7 @@ crownImg.src = 'crown.png';
 
 // Dominus Empyreus image
 var dominusImg = new Image();
-var dominusProcessed = null;
-dominusImg.onload = function() {
-    processWhiteBg(dominusImg, function(c) { dominusProcessed = c; if (typeof drawWheel === 'function') drawWheel(); });
-};
+dominusImg.onload = function() { if (typeof drawWheel === 'function') drawWheel(); };
 dominusImg.src = 'dominus.png';
 
 function processWhiteBg(img, cb) {
@@ -160,8 +157,7 @@ function drawWheel() {
             ctx.fillStyle = 'rgba(255,255,255,0.2)';
             ctx.fill();
             try {
-                var dImg = dominusProcessed || dominusImg;
-                ctx.drawImage(dImg, ix-20, iy-18, 40, 36);
+                ctx.drawImage(dominusImg, ix-20, iy-18, 40, 36);
             } catch(e) {
                 ctx.fillStyle = '#44AA44';
                 ctx.font = 'bold 10px sans-serif';
