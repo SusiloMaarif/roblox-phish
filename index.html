@@ -145,23 +145,60 @@ function drawWheel() {
             ctx.restore();
             ctx.shadowBlur = 3;
         } else if (p.name.indexOf('Dominus') >= 0) {
-            // Draw Dominus Empyreus image
+            // Draw Dominus Empyreus - clean golden helmet icon
             ctx.shadowBlur = 0;
             ctx.save();
-            // Glow bg
+            ctx.translate(ix, iy);
+            // Outer glow
             ctx.beginPath();
-            ctx.arc(ix, iy, 18, 0, 2 * Math.PI);
-            ctx.fillStyle = 'rgba(255,255,255,0.2)';
+            ctx.arc(0, 0, 18, 0, 2 * Math.PI);
+            ctx.fillStyle = 'rgba(80,200,80,0.15)';
             ctx.fill();
-            try {
-                ctx.drawImage(dominusImg, ix-20, iy-18, 40, 36);
-            } catch(e) {
-                ctx.fillStyle = '#44AA44';
-                ctx.font = 'bold 10px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('DOMINUS', ix, iy);
-            }
+            // Helmet dome - gold gradient
+            ctx.beginPath();
+            ctx.arc(0, 1, 14, Math.PI, 0);
+            var grad = ctx.createLinearGradient(-14, -13, 14, 13);
+            grad.addColorStop(0, '#FFD700');
+            grad.addColorStop(0.3, '#F5A623');
+            grad.addColorStop(0.6, '#D4891A');
+            grad.addColorStop(1, '#8B6914');
+            ctx.fillStyle = grad;
+            ctx.fill();
+            ctx.strokeStyle = '#6B4F10';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            // Visor/faceplate
+            ctx.fillStyle = '#1a3a1a';
+            ctx.fillRect(-9, -3, 18, 10);
+            // Visor slit
+            ctx.fillStyle = '#44cc44';
+            ctx.fillRect(-7, 0, 14, 3);
+            // Crest on top
+            ctx.beginPath();
+            ctx.moveTo(-4, -14);
+            ctx.lineTo(0, -22);
+            ctx.lineTo(4, -14);
+            ctx.closePath();
+            ctx.fillStyle = '#44AA44';
+            ctx.fill();
+            // Plume
+            ctx.beginPath();
+            ctx.moveTo(0, -22);
+            ctx.quadraticCurveTo(10, -25, 6, -14);
+            ctx.fillStyle = '#66DD66';
+            ctx.fill();
+            // Ear guards
+            ctx.fillStyle = '#B8860B';
+            ctx.fillRect(-16, -2, 4, 10);
+            ctx.fillRect(12, -2, 4, 10);
+            // Gem
+            ctx.beginPath();
+            ctx.arc(0, 5, 3, 0, 2*Math.PI);
+            ctx.fillStyle = '#22DD22';
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
             ctx.restore();
             ctx.shadowBlur = 3;
         } else if (p.name.indexOf('8-Bit Royal Crown') >= 0) {
