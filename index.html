@@ -12,15 +12,16 @@ var isSpinning = false;
 var wonPrize = '';
 
 var prizes = [
-    { name: '10,000 Robux',  color: '#E2231A', icon: '💰' },
+    { name: '10,000 Robux',  color: '#E2231A', icon: '🪙' },
     { name: 'Dominus Empyreus', color: '#FF6B00', icon: '👑' },
-    { name: '5,000 Robux',   color: '#1D4ED8', icon: '💎' },
+    { name: '5,000 Robux',   color: '#1D4ED8', icon: '🪙' },
     { name: 'Limited Item',  color: '#7C3AED', icon: '🎁' },
     { name: '2,500 Robux',   color: '#059669', icon: '🪙' },
     { name: 'Exclusive Badge',color: '#DC2626', icon: '🏅' },
-    { name: '1,000 Robux',   color: '#D97706', icon: '✨' },
+    { name: '1,000 Robux',   color: '#D97706', icon: '🪙' },
     { name: 'VIP Status',    color: '#0891B2', icon: '⭐' }
 ];
+
 
 // Countdown timer
 var countdownSeconds = 272;
@@ -88,25 +89,46 @@ function drawWheel() {
         ctx.shadowBlur = 3;
         
         if (p.name.indexOf('Robux') >= 0) {
-            // Draw Robux coin
-            ctx.beginPath();
-            ctx.arc(ix, iy, 14, 0, 2 * Math.PI);
-            var coinGrad = ctx.createRadialGradient(ix-3, iy-3, 2, ix, iy, 14);
-            coinGrad.addColorStop(0, '#FFD700');
-            coinGrad.addColorStop(0.7, '#DAA520');
-            coinGrad.addColorStop(1, '#B8860B');
-            ctx.fillStyle = coinGrad;
-            ctx.fill();
-            ctx.strokeStyle = '#8B6914';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            // R on coin
+            // Draw Robux coin - like real Roblox icon
             ctx.shadowBlur = 0;
+            // Outer ring with ridges
+            ctx.beginPath();
+            ctx.arc(ix, iy, 15, 0, 2 * Math.PI);
+            var outerGrad = ctx.createRadialGradient(ix-4, iy-4, 3, ix, iy, 15);
+            outerGrad.addColorStop(0, '#FFE44D');
+            outerGrad.addColorStop(0.5, '#F5A623');
+            outerGrad.addColorStop(1, '#8B6914');
+            ctx.fillStyle = outerGrad;
+            ctx.fill();
+            ctx.strokeStyle = '#6B4F10';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            // Inner circle
+            ctx.beginPath();
+            ctx.arc(ix, iy, 11, 0, 2 * Math.PI);
+            var innerGrad = ctx.createRadialGradient(ix-3, iy-3, 2, ix, iy, 11);
+            innerGrad.addColorStop(0, '#FFD700');
+            innerGrad.addColorStop(0.6, '#F5A623');
+            innerGrad.addColorStop(1, '#B8860B');
+            ctx.fillStyle = innerGrad;
+            ctx.fill();
+            // R logo - blocky style like Roblox
             ctx.fillStyle = '#fff';
-            ctx.font = 'bold 13px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('R', ix, iy);
+            ctx.shadowColor = 'rgba(0,0,0,0.3)';
+            ctx.shadowBlur = 1;
+            // Draw blocky R using rects
+            ctx.fillRect(ix-5, iy-6, 10, 3);
+            ctx.fillRect(ix-5, iy-6, 3, 12);
+            ctx.fillRect(ix+2, iy-6, 3, 6);
+            ctx.fillRect(ix-5, iy-1, 7, 3);
+            // Diagonal leg of R
+            ctx.beginPath();
+            ctx.moveTo(ix+1, iy+2);
+            ctx.lineTo(ix+6, iy+8);
+            ctx.lineTo(ix+4, iy+8);
+            ctx.lineTo(ix-1, iy+2);
+            ctx.closePath();
+            ctx.fill();
             ctx.shadowBlur = 3;
         } else if (p.name.indexOf('Dominus') >= 0) {
             // Draw crown
