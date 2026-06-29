@@ -81,16 +81,157 @@ function drawWheel() {
         ctx.save();
         ctx.translate(cx, cy);
         ctx.rotate(textAngle);
-        ctx.font = '28px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
+        
+        // Draw item icon based on type
+        var ix = r - 42, iy = -4;
         ctx.shadowColor = 'rgba(0,0,0,0.5)';
         ctx.shadowBlur = 3;
-        ctx.fillText(p.icon, r - 40, -8);
-        ctx.font = 'bold 10px "Builder Sans", Arial, sans-serif';
+        
+        if (p.name.indexOf('Robux') >= 0) {
+            // Draw Robux coin
+            ctx.beginPath();
+            ctx.arc(ix, iy, 14, 0, 2 * Math.PI);
+            var coinGrad = ctx.createRadialGradient(ix-3, iy-3, 2, ix, iy, 14);
+            coinGrad.addColorStop(0, '#FFD700');
+            coinGrad.addColorStop(0.7, '#DAA520');
+            coinGrad.addColorStop(1, '#B8860B');
+            ctx.fillStyle = coinGrad;
+            ctx.fill();
+            ctx.strokeStyle = '#8B6914';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            // R on coin
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 13px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('R', ix, iy);
+            ctx.shadowBlur = 3;
+        } else if (p.name.indexOf('Dominus') >= 0) {
+            // Draw crown
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#FFD700';
+            ctx.strokeStyle = '#B8860B';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(ix-14, iy+10);
+            ctx.lineTo(ix-14, iy-3);
+            ctx.lineTo(ix-8, iy-8);
+            ctx.lineTo(ix-3, iy-12);
+            ctx.lineTo(ix+3, iy-12);
+            ctx.lineTo(ix+8, iy-8);
+            ctx.lineTo(ix+14, iy-3);
+            ctx.lineTo(ix+14, iy+10);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            // Crown jewels
+            ctx.fillStyle = '#E2231A';
+            ctx.beginPath();
+            ctx.arc(ix-6, iy-2, 2.5, 0, 2*Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(ix+6, iy-2, 2.5, 0, 2*Math.PI);
+            ctx.fill();
+            ctx.fillStyle = '#1D4ED8';
+            ctx.beginPath();
+            ctx.arc(ix, iy-6, 3, 0, 2*Math.PI);
+            ctx.fill();
+            ctx.shadowBlur = 3;
+        } else if (p.name.indexOf('Limited') >= 0) {
+            // Draw gift box
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#FF6B00';
+            ctx.fillRect(ix-12, iy+2, 24, 14);
+            ctx.fillStyle = '#E2231A';
+            ctx.fillRect(ix-14, iy-3, 28, 6);
+            // Ribbon
+            ctx.fillStyle = '#FFD700';
+            ctx.fillRect(ix-2, iy-3, 4, 19);
+            // Bow
+            ctx.beginPath();
+            ctx.arc(ix-5, iy-5, 4, 0, 2*Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(ix+5, iy-5, 4, 0, 2*Math.PI);
+            ctx.fill();
+            // Dots on box
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(ix-5, iy+6, 1.5, 0, 2*Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(ix+5, iy+10, 1.5, 0, 2*Math.PI);
+            ctx.fill();
+            ctx.shadowBlur = 3;
+        } else if (p.name.indexOf('Badge') >= 0) {
+            // Draw badge/shield
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#FFD700';
+            ctx.strokeStyle = '#B8860B';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(ix-12, iy+8);
+            ctx.lineTo(ix-14, iy-6);
+            ctx.lineTo(ix-10, iy-12);
+            ctx.lineTo(ix-5, iy-14);
+            ctx.lineTo(ix, iy-10);
+            ctx.lineTo(ix+5, iy-14);
+            ctx.lineTo(ix+10, iy-12);
+            ctx.lineTo(ix+14, iy-6);
+            ctx.lineTo(ix+12, iy+8);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            // Star in badge
+            ctx.fillStyle = '#E2231A';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('★', ix, iy-2);
+            ctx.shadowBlur = 3;
+        } else if (p.name.indexOf('VIP') >= 0) {
+            // Draw star
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#FFD700';
+            ctx.strokeStyle = '#B8860B';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for (var s = 0; s < 5; s++) {
+                var angle = s * 2 * Math.PI / 5 - Math.PI/2;
+                var x = ix + 13 * Math.cos(angle);
+                var y = iy + 13 * Math.sin(angle);
+                if (s === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+                angle += 2 * Math.PI / 10;
+                x = ix + 6 * Math.cos(angle);
+                y = iy + 6 * Math.sin(angle);
+                ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            // V in star
+            ctx.fillStyle = '#1D4ED8';
+            ctx.font = 'bold 8px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('VIP', ix, iy+1);
+            ctx.shadowBlur = 3;
+        } else {
+            // Default: emoji
+            ctx.font = '28px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(p.icon, r - 40, -8);
+            ctx.shadowBlur = 3;
+        }
+        
+        ctx.font = 'bold 9px "Builder Sans", Arial, sans-serif';
         ctx.fillStyle = '#fff';
         ctx.shadowBlur = 2;
-        ctx.fillText(p.name, r - 40, 18);
+        ctx.fillText(p.name, r - 40, 22);
         ctx.restore();
     });
     
